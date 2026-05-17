@@ -15,4 +15,7 @@ interface VolumeRecordDao {
 
     @Query("DELETE FROM volume_records WHERE recordedAt < :beforeMs")
     suspend fun trim(beforeMs: Long)
+
+    @Query("DELETE FROM volume_records WHERE id NOT IN (SELECT id FROM volume_records ORDER BY recordedAt DESC LIMIT :keep)")
+    suspend fun trimTo(keep: Int)
 }

@@ -10,6 +10,9 @@ interface DefconHistoryDao {
     @Query("SELECT * FROM defcon_history ORDER BY computedAt DESC LIMIT 1")
     suspend fun latest(): DefconHistoryEntity?
 
+    @Query("SELECT * FROM defcon_history ORDER BY computedAt DESC LIMIT 2")
+    suspend fun latestTwo(): List<DefconHistoryEntity>
+
     @Query("SELECT * FROM defcon_history WHERE computedAt >= :sinceMs ORDER BY computedAt ASC")
     suspend fun since(sinceMs: Long): List<DefconHistoryEntity>
 

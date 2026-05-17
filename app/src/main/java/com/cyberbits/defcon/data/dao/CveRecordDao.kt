@@ -11,6 +11,9 @@ interface CveRecordDao {
     @Query("SELECT cveId FROM cve_records")
     suspend fun allCveIds(): List<String>
 
+    @Query("SELECT cveId FROM cve_records WHERE seenAt >= :sinceMs")
+    suspend fun cveIdsSince(sinceMs: Long): List<String>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<CveRecordEntity>)
 

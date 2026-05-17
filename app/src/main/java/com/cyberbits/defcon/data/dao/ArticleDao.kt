@@ -39,4 +39,13 @@ interface ArticleDao {
 
     @Query("SELECT COUNT(*) FROM articles WHERE publishedAt >= :sinceMs")
     suspend fun countSince(sinceMs: Long): Int
+
+    @Query("SELECT * FROM articles WHERE publishedAt >= :sinceMs ORDER BY publishedAt DESC")
+    suspend fun articlesSince(sinceMs: Long): List<ArticleEntity>
+
+    @Query("SELECT COUNT(*) FROM articles WHERE guid = :guid")
+    suspend fun guidCount(guid: String): Int
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(entity: ArticleEntity): Long
 }

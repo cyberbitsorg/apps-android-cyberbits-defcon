@@ -17,6 +17,9 @@ interface DedupRecordDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(items: List<DedupRecordEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(entity: DedupRecordEntity)
+
     /** Keep at most `keep` rows — delete the rest (oldest by addedAt). */
     @Query("DELETE FROM dedup_records WHERE fingerprint NOT IN " +
            "(SELECT fingerprint FROM dedup_records ORDER BY addedAt DESC LIMIT :keep)")
