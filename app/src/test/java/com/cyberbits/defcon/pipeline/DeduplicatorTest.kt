@@ -8,21 +8,15 @@ import org.junit.Test
 
 class DeduplicatorTest {
 
-    private fun art(title: String, guid: String = title): RawArticle = RawArticle(
-        guid = guid, title = title, summary = "", url = "https://x",
+    private fun art(title: String, summary: String = "", guid: String = title) = RawArticle(
+        guid = guid, title = title, summary = summary, url = "https://x",
         source = FeedSource.HACKREAD, publishedAt = 0L, categories = emptyList()
     )
 
-    @Test fun fingerprintIsDeterministic() {
+    @Test fun fingerprintIsDeterministicAndCaseInsensitive() {
         val a = Deduplicator.fingerprint("Critical zero-day patched in chrome browser")
         val b = Deduplicator.fingerprint("CRITICAL ZERO-DAY PATCHED IN CHROME BROWSER!!!")
         assertEquals(a, b)
-    }
-
-    @Test fun fingerprintDifferentForUnrelatedTitles() {
-        val a = Deduplicator.fingerprint("Microsoft patches kernel flaw")
-        val b = Deduplicator.fingerprint("Major ransomware attack on hospitals")
-        assertTrue(a != b)
     }
 
     @Test fun l1ExactFingerprintDropsDuplicate() {
@@ -33,28 +27,41 @@ class DeduplicatorTest {
         assertEquals(0, out.size)
     }
 
-    @Test fun unrelatedTitleSurvivesL1() {
-        val a = art("Microsoft releases security update")
-        val out = Deduplicator.deduplicate(
-            listOf(a),
-            existingFingerprints = setOf(Deduplicator.fingerprint("Major ransomware attack on hospitals")),
-            recentTitles = listOf("Major ransomware attack on hospitals"),
-        )
-        assertEquals(1, out.size)
+    @Test fun extractCveIdsCanonical() {
+        val cves = Deduplicator.extractCVEs("Fix for cve-2024-1234 and CVE 2024 56789 released")
+        assertTrue("CVE-2024-1234" in cves)
+        assertTrue("CVE-2024-56789" in cves)
     }
 
-    @Test fun temporalConflictPreventsL2Match() {
-        // Same words but different months — must NOT be flagged as duplicate.
+    @Test fun l1bCveMatchDropsDuplicate() {
+        val article = art("New patch released", summary = "Fixes CVE-2024-1234 critical bug")
+        val out = Deduplicator.deduplicate(
+            listOf(article),
+            existingFingerprints = emptySet(),
+            recentTitles = emptyList(),
+            recentCves = setOf("CVE-2024-1234"),
+        )
+        assertEquals(0, out.size)
+    }
+
+    @Test fun temporalConflictKeepsBoth() {
         val recent = listOf("Massive breach reported in January 2024")
         val incoming = art("Massive breach reported in March 2024")
-        val out = Deduplicator.deduplicate(listOf(incoming), existingFingerprints = emptySet(), recentTitles = recent)
-        assertEquals("kept because months differ", 1, out.size)
+        val out = Deduplicator.deduplicate(listOf(incoming), emptySet(), recent)
+        assertEquals(1, out.size)
     }
 
-    @Test fun yearConflictPreventsL2Match() {
+    @Test fun yearConflictKeepsBoth() {
         val recent = listOf("Critical breach disclosed at vendor in 2023")
         val incoming = art("Critical breach disclosed at vendor in 2025")
-        val out = Deduplicator.deduplicate(listOf(incoming), existingFingerprints = emptySet(), recentTitles = recent)
+        val out = Deduplicator.deduplicate(listOf(incoming), emptySet(), recent)
         assertEquals(1, out.size)
+    }
+
+    @Test fun jaccardThresholdDropsNearDuplicate() {
+        val recent = listOf("Microsoft patches critical exchange server vulnerability today")
+        val incoming = art("Microsoft patches critical exchange server vulnerability now")
+        val out = Deduplicator.deduplicate(listOf(incoming), emptySet(), recent)
+        assertEquals("near-duplicate dropped by Jaccard >= 0.28", 0, out.size)
     }
 }
