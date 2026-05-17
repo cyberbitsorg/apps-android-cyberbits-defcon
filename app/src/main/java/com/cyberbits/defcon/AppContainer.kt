@@ -1,8 +1,8 @@
 package com.cyberbits.defcon
 
 import android.content.Context
+import com.cyberbits.defcon.data.DefconDatabase
 
 class AppContainer(val applicationContext: Context) {
-    // Services added in later milestones: database, repositories,
-    // fetchCoordinator, notifier, settingsRepository, appState.
+    val database: DefconDatabase by lazy { DefconDatabase.build(applicationContext) }
 }
