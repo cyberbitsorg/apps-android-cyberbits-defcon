@@ -6,6 +6,7 @@ import com.cyberbits.defcon.data.CveRepository
 import com.cyberbits.defcon.data.DedupRepository
 import com.cyberbits.defcon.data.DefconDatabase
 import com.cyberbits.defcon.data.DefconRepository
+import com.cyberbits.defcon.data.SettingsRepository
 import com.cyberbits.defcon.data.VolumeRepository
 
 class AppContainer(val applicationContext: Context) {
@@ -18,4 +19,5 @@ class AppContainer(val applicationContext: Context) {
     val dedupRepository by lazy { DedupRepository(database.dedupRecordDao()) }
     val volumeRepository by lazy { VolumeRepository(database.volumeRecordDao()) }
     val cveRepository by lazy { CveRepository(database.cveRecordDao()) }
+    val settingsRepository by lazy { SettingsRepository(applicationContext) }
 }
