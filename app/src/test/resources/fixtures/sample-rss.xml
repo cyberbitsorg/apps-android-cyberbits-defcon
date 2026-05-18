@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Sample RSS</title>
+    <link>https://example.com/</link>
+    <description>Sample feed</description>
+    <item>
+      <title>Sample RSS Title 1</title>
+      <link>https://example.com/post-1</link>
+      <guid>https://example.com/post-1</guid>
+      <description>Summary one with &amp; entity.</description>
+      <pubDate>Tue, 10 Sep 2024 12:00:00 +0000</pubDate>
+      <category>security</category>
+    </item>
+    <item>
+      <title>Sample RSS Title 2</title>
+      <link>https://example.com/post-2</link>
+      <guid>https://example.com/post-2</guid>
+      <description>Summary two.</description>
+      <pubDate>Wed, 11 Sep 2024 09:30:00 +0000</pubDate>
+      <category>malware</category>
+    </item>
+  </channel>
+</rss>

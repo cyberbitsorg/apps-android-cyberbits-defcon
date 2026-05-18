@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Sample Atom</title>
+  <id>tag:example.com,2024:/feed</id>
+  <updated>2024-09-10T12:00:00Z</updated>
+  <entry>
+    <title>Sample Atom Title 1</title>
+    <id>tag:example.com,2024:/atom-1</id>
+    <link href="https://example.com/atom-1"/>
+    <published>2024-09-10T12:00:00Z</published>
+    <updated>2024-09-10T12:00:00Z</updated>
+    <summary>Atom summary one.</summary>
+    <category term="security"/>
+  </entry>
+  <entry>
+    <title>Sample Atom Title 2</title>
+    <id>tag:example.com,2024:/atom-2</id>
+    <link href="https://example.com/atom-2"/>
+    <published>2024-09-11T09:30:00Z</published>
+    <updated>2024-09-11T09:30:00Z</updated>
+    <summary>Atom summary two.</summary>
+    <category term="malware"/>
+  </entry>
+</feed>

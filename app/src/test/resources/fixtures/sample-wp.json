@@ -1,0 +1,18 @@
+[
+  {
+    "id": 101,
+    "link": "https://securityaffairs.com/post-101",
+    "date_gmt": "2024-09-10T12:00:00",
+    "title": { "rendered": "WP Title 1 &amp; more" },
+    "excerpt": { "rendered": "<p>WP excerpt one.</p>" },
+    "categories": [1, 2]
+  },
+  {
+    "id": 102,
+    "link": "https://securityaffairs.com/post-102",
+    "date_gmt": "2024-09-11T09:30:00",
+    "title": { "rendered": "WP Title 2" },
+    "excerpt": { "rendered": "<p>WP excerpt two.</p>" },
+    "categories": [3]
+  }
+]
