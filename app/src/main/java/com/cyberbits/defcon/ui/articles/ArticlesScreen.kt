@@ -92,9 +92,12 @@ fun ArticlesScreen(container: AppContainer) {
                             contentDescription = "Search",
                         )
                     }
-                    TextButton(onClick = { vm.markAllRead() }, enabled = articles.isNotEmpty()) {
+                    TextButton(
+                        onClick = { if (allRead) vm.markAllUnread() else vm.markAllRead() },
+                        enabled = articles.isNotEmpty(),
+                    ) {
                         Text(
-                            if (allRead) "Unread all" else "Mark all read",
+                            if (allRead) "Mark all unread" else "Mark all read",
                             style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Medium),
                         )
                     }

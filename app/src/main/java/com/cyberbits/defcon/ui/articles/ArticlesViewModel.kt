@@ -49,6 +49,9 @@ class ArticlesViewModel(private val container: AppContainer) : ViewModel() {
     fun markAllRead() = viewModelScope.launch {
         container.articleRepository.markAllRead(System.currentTimeMillis())
     }
+    fun markAllUnread() = viewModelScope.launch {
+        container.articleRepository.markAllUnread()
+    }
     fun refresh() = viewModelScope.launch {
         container.appState.isRefreshing.value = true
         container.appState.defconStatus.value = container.fetchCoordinator.runFetchCycle()

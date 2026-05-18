@@ -31,6 +31,9 @@ interface ArticleDao {
     @Query("UPDATE articles SET isRead = 1, readAt = :now WHERE isRead = 0")
     suspend fun markAllRead(now: Long)
 
+    @Query("UPDATE articles SET isRead = 0, readAt = NULL WHERE isRead = 1")
+    suspend fun markAllUnread()
+
     @Query("DELETE FROM articles WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<String>)
 

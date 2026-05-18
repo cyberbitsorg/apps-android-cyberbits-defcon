@@ -59,24 +59,37 @@ class ArticleRepository(private val dao: ArticleDao) {
     }
 
     /**
-     * Newest-first sequential filter: keep up to [perSource] per feed source,
-     * up to [total] overall. Everything else is deleted. Mirrors the iOS
-     * `ArticleStore.trim` algorithm exactly.
+     * Newest-first two-pass trim:
+     * 1. Keep up to [perSource] newest per feed source (fairness, like iOS).
+     * 2. If [total] is not yet filled, top up with the next-newest articles
+     *    regardless of source. This guarantees the DB tends to [total]
+     *    whenever there is enough raw material across sources — the iOS
+     *    single-pass version would leave gaps when a feed yields < perSource.
      */
     suspend fun trim(total: Int = 100, perSource: Int = 20) {
         val all = dao.mostRecent(Int.MAX_VALUE)
+        if (all.isEmpty()) return
+        val kept = HashSet<String>()
         val keptPerSource = mutableMapOf<FeedSource, Int>()
-        var keptTotal = 0
-        val toDelete = mutableListOf<String>()
+
+        // Pass 1: per-source cap
         for (a in all) {
+            if (kept.size >= total) break
             val per = keptPerSource[a.source] ?: 0
-            if (per < perSource && keptTotal < total) {
+            if (per < perSource) {
                 keptPerSource[a.source] = per + 1
-                keptTotal++
-            } else {
-                toDelete += a.id
+                kept += a.id
             }
         }
+        // Pass 2: top-up to [total] from remaining articles (newest first)
+        if (kept.size < total) {
+            for (a in all) {
+                if (kept.size >= total) break
+                if (a.id !in kept) kept += a.id
+            }
+        }
+
+        val toDelete = all.filter { it.id !in kept }.map { it.id }
         if (toDelete.isNotEmpty()) dao.deleteByIds(toDelete)
     }
 
@@ -85,6 +98,8 @@ class ArticleRepository(private val dao: ArticleDao) {
 
     suspend fun markAllRead(now: Long = System.currentTimeMillis()) =
         dao.markAllRead(now)
+
+    suspend fun markAllUnread() = dao.markAllUnread()
 
     suspend fun countSince(sinceMs: Long): Int = dao.countSince(sinceMs)
 }
