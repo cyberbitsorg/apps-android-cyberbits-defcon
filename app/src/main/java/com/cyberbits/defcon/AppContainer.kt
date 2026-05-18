@@ -9,6 +9,7 @@ import com.cyberbits.defcon.data.DefconRepository
 import com.cyberbits.defcon.data.SettingsRepository
 import com.cyberbits.defcon.data.VolumeRepository
 import com.cyberbits.defcon.notification.DefconNotifier
+import com.cyberbits.defcon.pipeline.FetchCoordinator
 
 class AppContainer(val applicationContext: Context) {
     val database: DefconDatabase by lazy { DefconDatabase.build(applicationContext) }
@@ -23,4 +24,16 @@ class AppContainer(val applicationContext: Context) {
     val settingsRepository by lazy { SettingsRepository(applicationContext) }
 
     val notifier by lazy { DefconNotifier(applicationContext) }
+
+    val fetchCoordinator by lazy {
+        FetchCoordinator(
+            articles = articleRepository,
+            defcon = defconRepository,
+            dedup = dedupRepository,
+            volume = volumeRepository,
+            cves = cveRepository,
+            settings = settingsRepository,
+            notifier = notifier,
+        )
+    }
 }
