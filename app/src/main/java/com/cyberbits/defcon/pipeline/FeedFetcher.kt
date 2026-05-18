@@ -10,7 +10,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.concurrent.TimeUnit
 
-class FeedFetcher(
+open class FeedFetcher(
     private val client: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -19,7 +19,7 @@ class FeedFetcher(
 ) {
     data class FetchResult(val source: FeedSource, val body: String?, val error: Throwable?)
 
-    suspend fun fetch(source: FeedSource): FetchResult = withContext(Dispatchers.IO) {
+    open suspend fun fetch(source: FeedSource): FetchResult = withContext(Dispatchers.IO) {
         try {
             val req = Request.Builder()
                 .url(source.feedUrl)
