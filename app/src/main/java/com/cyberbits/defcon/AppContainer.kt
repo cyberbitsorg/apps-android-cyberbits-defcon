@@ -25,6 +25,8 @@ class AppContainer(val applicationContext: Context) {
 
     val notifier by lazy { DefconNotifier(applicationContext) }
 
+    val appState = AppState()
+
     val fetchCoordinator by lazy {
         FetchCoordinator(
             articles = articleRepository,
