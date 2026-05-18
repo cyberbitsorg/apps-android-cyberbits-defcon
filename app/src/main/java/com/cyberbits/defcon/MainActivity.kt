@@ -3,6 +3,8 @@ package com.cyberbits.defcon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.cyberbits.defcon.ui.DefconRoot
 import com.cyberbits.defcon.work.RefreshScheduler
@@ -26,5 +28,15 @@ class MainActivity : ComponentActivity() {
             val interval = container.settingsRepository.current().refreshIntervalMinutes
             RefreshScheduler.schedule(applicationContext, interval)
         }
+
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStart(owner: LifecycleOwner) {
+                lifecycleScope.launch {
+                    container.fetchCoordinator.tickStickyLevel()?.let {
+                        container.appState.defconStatus.value = it
+                    }
+                }
+            }
+        })
     }
 }
