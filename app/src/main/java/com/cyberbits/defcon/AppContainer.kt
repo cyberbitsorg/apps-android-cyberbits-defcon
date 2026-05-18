@@ -8,6 +8,7 @@ import com.cyberbits.defcon.data.DefconDatabase
 import com.cyberbits.defcon.data.DefconRepository
 import com.cyberbits.defcon.data.SettingsRepository
 import com.cyberbits.defcon.data.VolumeRepository
+import com.cyberbits.defcon.notification.DefconNotifier
 
 class AppContainer(val applicationContext: Context) {
     val database: DefconDatabase by lazy { DefconDatabase.build(applicationContext) }
@@ -20,4 +21,6 @@ class AppContainer(val applicationContext: Context) {
     val volumeRepository by lazy { VolumeRepository(database.volumeRecordDao()) }
     val cveRepository by lazy { CveRepository(database.cveRecordDao()) }
     val settingsRepository by lazy { SettingsRepository(applicationContext) }
+
+    val notifier by lazy { DefconNotifier(applicationContext) }
 }
