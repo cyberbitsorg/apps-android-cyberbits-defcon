@@ -1,5 +1,6 @@
 package com.cyberbits.defcon.ui.dashboard
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -8,51 +9,77 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.cyberbits.defcon.data.entity.ArticleEntity
-import com.cyberbits.defcon.pipeline.Vocabulary
+import com.cyberbits.defcon.ui.common.SectionHeader
+import com.cyberbits.defcon.ui.theme.adaptiveSurface
+import com.cyberbits.defcon.ui.theme.colorHex
+import com.cyberbits.defcon.ui.theme.textTertiary
+
+// Same tracked list as iOS TrendingKeywords (keyword, tier weight, color).
+private val TRACKED: List<Triple<String, Int, Color>> = listOf(
+    Triple("zero-day", 5, colorHex("dc2626")),
+    Triple("ransomware", 4, colorHex("dc2626")),
+    Triple("exploit", 3, colorHex("ea580c")),
+    Triple("apt", 3, colorHex("ea580c")),
+    Triple("vulnerability", 2, colorHex("f59e0b")),
+    Triple("malware", 2, colorHex("f59e0b")),
+    Triple("breach", 2, colorHex("f59e0b")),
+    Triple("cve", 1, colorHex("3b82f6")),
+    Triple("backdoor", 1, colorHex("3b82f6")),
+    Triple("phishing", 1, colorHex("8b5cf6")),
+    Triple("ddos", 1, colorHex("8b5cf6")),
+    Triple("supply chain", 2, colorHex("ea580c")),
+)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TrendingKeywords(articles: List<ArticleEntity>, modifier: Modifier = Modifier) {
-    val counts = HashMap<String, Int>()
-    val allKeywords = (Vocabulary.tier1 + Vocabulary.tier2 + Vocabulary.tier3).distinct()
-    for (a in articles) {
-        val text = "${a.title} ${a.summary}".lowercase()
-        for (kw in allKeywords) {
-            if (text.contains(kw)) counts[kw] = (counts[kw] ?: 0) + 1
-        }
-    }
-    val top = counts.entries.sortedByDescending { it.value }.take(20)
+    val combined = articles.take(50)
+        .joinToString(" ") { "${it.title} ${it.summary}".lowercase() }
 
-    Column(modifier = modifier.fillMaxWidth().padding(16.dp)) {
-        Text("Trending keywords", style = MaterialTheme.typography.titleMedium)
+    val keywords = TRACKED.mapNotNull { (kw, tier, color) ->
+        val count = combined.split(kw).size - 1
+        if (count > 0) Triple(kw, count * tier, color) else null
+    }.sortedByDescending { it.second }.take(12)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(adaptiveSurface())
+            .padding(16.dp),
+    ) {
+        SectionHeader("Trending keywords", tracking = 1f)
         Spacer(Modifier.height(8.dp))
-        if (top.isEmpty()) {
-            Text("No data yet", style = MaterialTheme.typography.bodySmall)
+        if (keywords.isEmpty()) {
+            Text("No data yet", color = textTertiary(), style = TextStyle(fontSize = 11.sp))
         } else {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                top.forEach { (kw, count) ->
-                    val tierColor = when (kw) {
-                        in Vocabulary.tier1 -> Color(0xFFDC2626)
-                        in Vocabulary.tier2 -> Color(0xFFEAB308)
-                        else -> Color(0xFF3B82F6)
-                    }
-                    AssistChip(
-                        onClick = {},
-                        label = { Text("$kw ($count)") },
-                        colors = AssistChipDefaults.assistChipColors(labelColor = tierColor),
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                keywords.forEach { (kw, count, color) ->
+                    val size = (10 + (count / 2).coerceAtMost(6)).sp
+                    Text(
+                        kw,
+                        color = color,
+                        style = TextStyle(fontSize = size),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(color.copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                     )
                 }
             }
         }
-        Spacer(Modifier.height(4.dp))
     }
 }

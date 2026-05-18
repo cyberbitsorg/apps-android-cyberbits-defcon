@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cyberbits.defcon.AppContainer
+import com.cyberbits.defcon.data.AppearanceMode
 import com.cyberbits.defcon.data.SettingsRepository
 import com.cyberbits.defcon.work.RefreshScheduler
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,6 +33,10 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
 
     fun setNewArticleNotificationsEnabled(v: Boolean) = viewModelScope.launch {
         container.settingsRepository.setNewArticleNotificationsEnabled(v)
+    }
+
+    fun setAppearance(v: AppearanceMode) = viewModelScope.launch {
+        container.settingsRepository.setAppearance(v)
     }
 
     fun refreshNow() = viewModelScope.launch {

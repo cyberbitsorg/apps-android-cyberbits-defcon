@@ -1,18 +1,22 @@
 package com.cyberbits.defcon.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.cyberbits.defcon.AppContainer
+import com.cyberbits.defcon.data.AppearanceMode
+import com.cyberbits.defcon.data.SettingsRepository
 import com.cyberbits.defcon.ui.articles.ArticlesScreen
 import com.cyberbits.defcon.ui.dashboard.DashboardScreen
 import com.cyberbits.defcon.ui.settings.SettingsScreen
@@ -26,14 +30,22 @@ enum class Destination(val label: String) {
 
 @Composable
 fun DefconRoot(container: AppContainer) {
-    DefconTheme {
+    val settings by container.settingsRepository.settings.collectAsState(initial = SettingsRepository.Settings())
+    val systemDark = isSystemInDarkTheme()
+    val darkTheme = when (settings.appearance) {
+        AppearanceMode.SYSTEM -> systemDark
+        AppearanceMode.LIGHT -> false
+        AppearanceMode.DARK -> true
+    }
+
+    DefconTheme(darkTheme = darkTheme) {
         var selected by remember { mutableStateOf(Destination.Dashboard) }
         NavigationSuiteScaffold(
             navigationSuiteItems = {
                 Destination.entries.forEach { d ->
                     val icon = when (d) {
                         Destination.Dashboard -> Icons.Filled.Dashboard
-                        Destination.Articles -> Icons.Filled.Article
+                        Destination.Articles -> Icons.AutoMirrored.Filled.Article
                         Destination.Settings -> Icons.Filled.Settings
                     }
                     item(
