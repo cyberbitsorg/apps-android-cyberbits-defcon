@@ -108,11 +108,26 @@ fun ArticleRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Text(
-                    article.source.displayName,
-                    color = article.source.accentColor(),
-                    style = TextStyle(fontSize = 10.sp),
-                )
+                // Slate-300 fill, uniform across sources — matches docker fallback;
+                // DEFCON-level colored border conveys severity at a glance.
+                val badgeColor = com.cyberbits.defcon.model.FeedSource.BLEEPING_COMPUTER.accentColor()
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(badgeColor.copy(alpha = 0.12f))
+                        .border(1.dp, levelColor.copy(alpha = 0.38f), RoundedCornerShape(4.dp))
+                        .padding(horizontal = 5.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        article.source.abbreviation,
+                        color = badgeColor,
+                        style = TextStyle(
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.6.sp,
+                        ),
+                    )
+                }
                 Text("·", color = textTertiary(), style = TextStyle(fontSize = 10.sp))
                 Text(
                     RelativeTime.format(article.publishedAt),

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,16 +72,25 @@ fun SeverityBreakdown(
                     )
                     Spacer(Modifier.height(4.dp))
                     val heightDp = (56.dp.value * (count.toFloat() / maxCount)).coerceAtLeast(8f).dp
+                    val shape = RoundedCornerShape(4.dp)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(heightDp)
-                            .clip(RoundedCornerShape(4.dp))
+                            .then(
+                                if (level == 1) Modifier.shadow(
+                                    elevation = 4.dp,
+                                    shape = shape,
+                                    ambientColor = androidx.compose.ui.graphics.Color(0xFFDC2626),
+                                    spotColor = androidx.compose.ui.graphics.Color(0xFFDC2626),
+                                ) else Modifier
+                            )
+                            .clip(shape)
                             .background(barColor.copy(alpha = if (active) 1f else 0.85f))
                             .border(
                                 if (active) 2.dp else 0.dp,
                                 barColor,
-                                RoundedCornerShape(4.dp),
+                                shape,
                             ),
                     )
                     Spacer(Modifier.height(4.dp))

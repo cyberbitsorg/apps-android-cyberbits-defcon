@@ -79,12 +79,12 @@ fun DashboardScreen(container: AppContainer, onSeverityTap: (Int) -> Unit) {
             ) {
                 DefconGauge(status)
                 ThreatIndicators(status, articleCount = articles.size)
+                TopThreatsWidget(articles)
                 SeverityBreakdown(
                     articles = articles,
                     activeFilter = severityFilter,
                     onSeverityTap = onSeverityTap,
                 )
-                TopThreatsWidget(articles)
                 TrendingKeywords(articles)
                 RecentCVEs(articles)
                 SourceDistribution(articles)

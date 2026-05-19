@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -66,7 +67,12 @@ fun TopThreatsWidget(articles: List<ArticleEntity>, modifier: Modifier = Modifie
                             .background(DefconColors.colorForLevel(level)),
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text(article.title, maxLines = 2, style = TextStyle(fontSize = 12.sp))
+                    Text(
+                        article.title,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        style = TextStyle(fontSize = 12.sp),
+                    )
                 }
             }
         }
