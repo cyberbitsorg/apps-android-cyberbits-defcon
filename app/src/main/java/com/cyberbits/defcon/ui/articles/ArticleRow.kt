@@ -33,8 +33,10 @@ import com.cyberbits.defcon.data.entity.ArticleEntity
 import com.cyberbits.defcon.pipeline.Scorer
 import com.cyberbits.defcon.ui.common.RelativeTime
 import com.cyberbits.defcon.ui.theme.DefconColors
+import com.cyberbits.defcon.ui.theme.LocalDefconDarkTheme
 import com.cyberbits.defcon.ui.theme.accentColor
 import com.cyberbits.defcon.ui.theme.adaptiveSurface
+import com.cyberbits.defcon.ui.theme.colorHex
 import com.cyberbits.defcon.ui.theme.textSecondary
 import com.cyberbits.defcon.ui.theme.textTertiary
 
@@ -46,6 +48,8 @@ fun ArticleRow(
 ) {
     val level = Scorer.levelFromScore(article.defconScore)
     val levelColor = DefconColors.colorForLevel(level)
+    val isDark = LocalDefconDarkTheme.current
+    val levelDisplayColor = if (level == 1 && !isDark) colorHex("111827") else levelColor
 
     Row(
         modifier = modifier
@@ -94,7 +98,7 @@ fun ArticleRow(
                 ) {
                     Text(
                         "%.0f".format(article.defconScore),
-                        color = levelColor,
+                        color = levelDisplayColor,
                         style = TextStyle(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,

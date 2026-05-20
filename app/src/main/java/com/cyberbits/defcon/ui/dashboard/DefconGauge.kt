@@ -39,6 +39,7 @@ import com.cyberbits.defcon.model.DefconStatus
 import com.cyberbits.defcon.model.Trend
 import com.cyberbits.defcon.ui.common.SectionHeader
 import com.cyberbits.defcon.ui.theme.DefconColors
+import com.cyberbits.defcon.ui.theme.LocalDefconDarkTheme
 import com.cyberbits.defcon.ui.theme.adaptiveBorder
 import com.cyberbits.defcon.ui.theme.colorHex
 import com.cyberbits.defcon.ui.theme.textSecondary
@@ -125,6 +126,7 @@ private fun DriverRow(status: DefconStatus?, color: Color) {
 @Composable
 private fun GaugeArc(level: Int, score: Double, modifier: Modifier) {
     val animatedScore by animateFloatAsState(score.toFloat(), tween(500), label = "scoreSweep")
+    val isDark = LocalDefconDarkTheme.current
 
     val startDeg = 150.0
     val sweepDeg = 240.0
@@ -136,6 +138,8 @@ private fun GaugeArc(level: Int, score: Double, modifier: Modifier) {
         Color.White,        // 1
     )
     val levelColor = DefconColors.colorForLevel(level)
+    val needleColor = if (isDark) Color.White.copy(alpha = 0.9f) else Color.Black.copy(alpha = 0.9f)
+    val levelDisplayColor = if (level == 1 && !isDark) colorHex("111827") else levelColor
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.fillMaxWidth().height(180.dp)) {
@@ -194,10 +198,10 @@ private fun GaugeArc(level: Int, score: Double, modifier: Modifier) {
             val path = Path().apply {
                 moveTo(tip.x, tip.y); lineTo(left.x, left.y); lineTo(right.x, right.y); close()
             }
-            drawPath(path, Color.White.copy(alpha = 0.9f))
+            drawPath(path, needleColor)
 
             // Pivot
-            drawCircle(Color.White.copy(alpha = 0.9f), radius = 5.dp.toPx(), center = Offset(cx, cy))
+            drawCircle(needleColor, radius = 5.dp.toPx(), center = Offset(cx, cy))
             drawCircle(levelColor, radius = 3.dp.toPx(), center = Offset(cx, cy))
         }
 
@@ -211,14 +215,14 @@ private fun GaugeArc(level: Int, score: Double, modifier: Modifier) {
                 "$level",
                 style = TextStyle(
                     fontSize = 30.sp, fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace, color = levelColor,
+                    fontFamily = FontFamily.Monospace, color = levelDisplayColor,
                 ),
             )
             Text(
                 DefconStatus.labelFor(level).uppercase(),
                 style = TextStyle(
                     fontSize = 9.sp, fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.sp, color = levelColor.copy(alpha = 0.85f),
+                    letterSpacing = 1.sp, color = levelDisplayColor.copy(alpha = 0.85f),
                 ),
             )
             Text(
