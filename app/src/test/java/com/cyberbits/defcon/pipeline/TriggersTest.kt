@@ -52,4 +52,52 @@ class TriggersTest {
         assertEquals(true, Triggers.isNewsletterTitle("Weekly Roundup: top stories"))
         assertEquals(false, Triggers.isNewsletterTitle("Patch released for critical bug"))
     }
+
+    // confirmed_breach: repos/packages as scale entities
+
+    @Test fun confirmedBreach_githubRepos_commaScale() {
+        val text = "github confirms breach of 3,800 repos via malicious vscode extension"
+        val m = Triggers.detect(text.lowercase())
+        assertNotNull(m)
+        assertEquals(TriggerType.CONFIRMED_BREACH, m?.trigger)
+    }
+
+    @Test fun confirmedBreach_npmPackages_commaScale() {
+        val text = "npm registry data breach exposes source code of 15,000 packages"
+        val m = Triggers.detect(text.lowercase())
+        assertNotNull(m)
+        assertEquals(TriggerType.CONFIRMED_BREACH, m?.trigger)
+    }
+
+    @Test fun confirmedBreach_packageRegistry_sectorScale() {
+        val text = "npm package registry confirms breach of developer credentials"
+        val m = Triggers.detect(text.lowercase())
+        assertNotNull(m)
+        assertEquals(TriggerType.CONFIRMED_BREACH, m?.trigger)
+    }
+
+    @Test fun noFP_repos_withoutBreachVerb() {
+        val text = "developer shares 3,800 repos on github under open source license"
+        val m = Triggers.detect(text.lowercase())
+        assertNotEquals(TriggerType.CONFIRMED_BREACH, m?.trigger)
+    }
+
+    @Test fun noFP_packages_withoutBreachVerb() {
+        val text = "npm publishes 15,000 packages per day as ecosystem grows"
+        val m = Triggers.detect(text.lowercase())
+        assertNotEquals(TriggerType.CONFIRMED_BREACH, m?.trigger)
+    }
+
+    // Vocabulary: supply chain terms in tier1
+
+    @Test fun tier1_containsSupplyChainTerms() {
+        assert(Vocabulary.tier1.contains("malicious extension"))
+        assert(Vocabulary.tier1.contains("malicious plugin"))
+        assert(Vocabulary.tier1.contains("malicious package"))
+        assert(Vocabulary.tier1.contains("malicious dependency"))
+    }
+
+    @Test fun criticalSectors_containsPackageRegistry() {
+        assert(Vocabulary.criticalSectors.contains("package registry"))
+    }
 }

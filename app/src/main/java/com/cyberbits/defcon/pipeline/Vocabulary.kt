@@ -7,6 +7,8 @@ object Vocabulary {
         "ransomware attack", "critical infrastructure",
         "infostealer", "stealer campaign", "malware campaign",
         "supply chain attack", "credential stealer",
+        "malicious extension", "malicious plugin",
+        "malicious package", "malicious dependency",
     )
 
     val tier2: List<String> = listOf(
@@ -46,6 +48,7 @@ object Vocabulary {
         "rail", "railway", "metro", "transit", "subway",
         "school", "schools", "k-12",
         "hospital system", "health system", "healthcare",
+        "package registry",
     )
 
     val knownStealers: List<String> = listOf(

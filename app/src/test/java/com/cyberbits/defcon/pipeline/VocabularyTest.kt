@@ -8,12 +8,12 @@ class VocabularyTest {
 
     @Test fun tier1ContainsExpectedTerms() {
         assertTrue(Vocabulary.tier1.isNotEmpty())
-        assertEquals(13, Vocabulary.tier1.size)
+        assertEquals(17, Vocabulary.tier1.size)
         assertTrue("zero-day" in Vocabulary.tier1)
         assertTrue("nation-state" in Vocabulary.tier1)
         assertTrue("supply chain attack" in Vocabulary.tier1)
         assertEquals("zero-day", Vocabulary.tier1.first())
-        assertEquals("credential stealer", Vocabulary.tier1.last())
+        assertEquals("malicious dependency", Vocabulary.tier1.last())
     }
 
     @Test fun tier2ContainsExpectedTerms() {
@@ -41,7 +41,7 @@ class VocabularyTest {
 
     @Test fun criticalSectorsContainCoreEntries() {
         assertTrue(Vocabulary.criticalSectors.isNotEmpty())
-        assertEquals(25, Vocabulary.criticalSectors.size)
+        assertEquals(26, Vocabulary.criticalSectors.size)
         assertTrue("power grid" in Vocabulary.criticalSectors)
         assertTrue("hospital" in Vocabulary.criticalSectors)
         assertTrue("k-12" in Vocabulary.criticalSectors)

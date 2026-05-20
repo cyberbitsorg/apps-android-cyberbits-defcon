@@ -89,9 +89,9 @@ object Triggers {
         """(stolen|stole|theft of|claimed theft of|stealing) .{0,40}(records|users|emails|customers|accounts|tokens|credentials))\b"""
 
     private val breachScaleMillionsPattern = """\bmillions? of\b"""
-    private val breachScaleNumericPattern = """\b\d+[kKmM]\+?\s*(users|records|emails|accounts|customers)\b"""
+    private val breachScaleNumericPattern = """\b\d+[kKmM]\+?\s*(users|records|emails|accounts|customers|repos|repositories|packages|codebases?)\b"""
     private val breachScaleCommaPattern =
-        """\b\d{1,3}(?:,\d{3})+\s+(users|records|emails|accounts|customers|people|schools|patients|students|employees|individuals|organizations)\b"""
+        """\b\d{1,3}(?:,\d{3})+\s+(users|records|emails|accounts|customers|people|schools|patients|students|employees|individuals|organizations|repos|repositories|packages|codebases?)\b"""
 
     private val criticalSectorPattern: String
         get() {
