@@ -165,6 +165,9 @@ object Scorer {
         }
         scores.maxOrNull()?.let { return it }
 
+        // "max severity" / "maximum severity" — vendor-press shorthand for CVSS ~10.
+        if (cachedRegex("""\bmax(?:imum)?\s+severity\b""").containsMatchIn(text)) return 9.0
+
         // 2) CVE id + severity word co-occurrence
         if (cachedRegex(cveIdPattern).containsMatchIn(text)) {
             val matched = severityWords

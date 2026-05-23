@@ -3,6 +3,8 @@ package com.cyberbits.defcon.pipeline
 enum class TriggerType(val rawValue: String, val baseScore: Double, val label: String) {
     ACTIVE_EXPLOITATION("active_exploitation", 70.0, "Active Exploitation"),
     KEV_ADDITION("kev_addition", 70.0, "KEV Addition"),
+    CEILING_CVSS("ceiling_cvss", 65.0, "Ceiling CVSS"),
+    SUPPLY_CHAIN_COMPROMISE("supply_chain_compromise", 65.0, "Supply Chain Compromise"),
     CRITICAL_SCOPE_VULN("critical_scope_vuln", 65.0, "Critical Scope Vuln"),
     CONFIRMED_BREACH("confirmed_breach", 65.0, "Confirmed Breach"),
     APT_CAMPAIGN("apt_campaign", 60.0, "APT Campaign"),

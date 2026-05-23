@@ -6,6 +6,8 @@ object Triggers {
     private val precedence: List<TriggerType> = listOf(
         TriggerType.ACTIVE_EXPLOITATION,
         TriggerType.KEV_ADDITION,
+        TriggerType.CEILING_CVSS,
+        TriggerType.SUPPLY_CHAIN_COMPROMISE,
         TriggerType.CRITICAL_SCOPE_VULN,
         TriggerType.CONFIRMED_BREACH,
         TriggerType.APT_CAMPAIGN,
@@ -22,6 +24,7 @@ object Triggers {
         for (trigger in precedence) {
             if (contest && (trigger == TriggerType.ACTIVE_EXPLOITATION ||
                             trigger == TriggerType.KEV_ADDITION ||
+                            trigger == TriggerType.CEILING_CVSS ||
                             trigger == TriggerType.CRITICAL_SCOPE_VULN)) {
                 continue
             }
@@ -130,6 +133,18 @@ object Triggers {
 
     private val campaignVerbPattern = """\b(targeting|deploys?|distributes?|spreads?|drops?|delivers?|campaign|infects?|infecting)\b"""
 
+    // ceiling_cvss: explicit CVSS 10.0 / 9.8 / 9.9
+    private val ceilingCvssPattern = """\bcvss[^\n]{0,20}?(10(?:\.0)?|9\.[89])\b"""
+
+    // supply_chain_compromise: artifact + badness + scale
+    private val supplyChainArtifactPattern =
+        """\b(repos|repositories|packages|codebases?|workflows|ci/cd|registry|""" +
+        """npm|pypi|rubygems|crates\.io|docker images?|container images?|maven|nuget)\b"""
+    private val supplyChainBadnessPattern =
+        """\b(malicious|compromised?|poisoned|backdoor(?:ed)?|typosquat\w*|trojanized|infected|hijacked)\b"""
+    private val supplyChainScalePattern =
+        """\b(\d{1,3}(?:,\d{3})+|\d{2,}|hundreds|thousands|dozens)\b"""
+
     private val contestPattern =
         """\bpwn2own\b|\bcapture[- ]the[- ]flag\b|\bctf\b|\bhack(?:athon|fest|the box)\b|""" +
         """\bbug bounty\b|\bdef ?con (?:ctf|village|finals?)\b|\bhackone\b|\bhackerone\b|""" +
@@ -186,6 +201,18 @@ object Triggers {
                 val vuln = cachedRegex(vulnKeywordPattern).find(text) ?: return null
                 if (!hasScopeAmplifier(text)) return null
                 return vuln.value
+            }
+
+            TriggerType.CEILING_CVSS -> {
+                val m = cachedRegex(ceilingCvssPattern).find(text) ?: return null
+                return m.value
+            }
+
+            TriggerType.SUPPLY_CHAIN_COMPROMISE -> {
+                val artifact = cachedRegex(supplyChainArtifactPattern).find(text) ?: return null
+                if (!cachedRegex(supplyChainBadnessPattern).containsMatchIn(text)) return null
+                if (!cachedRegex(supplyChainScalePattern).containsMatchIn(text)) return null
+                return artifact.value
             }
 
             TriggerType.MALWARE_CAMPAIGN -> {

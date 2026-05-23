@@ -29,6 +29,15 @@ class ScorerTest {
         assertEquals(null, r.trigger)
     }
 
+    @Test fun cvssMaxSeverityPhraseScores9() {
+        // "max severity" / "maximum severity" → infers CVSS 9.0 → cveScore 27
+        val r = Scorer.computeArticleScore(
+            "Ubiquiti patches three max severity unifi os vulnerabilities",
+            ""
+        )
+        assertEquals(27.0, r.cve, 0.1)
+    }
+
     @Test fun cvssExplicitWindowExtracts() {
         val r = Scorer.computeArticleScore(
             "Vendor patches bug",
