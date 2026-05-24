@@ -23,7 +23,7 @@ import com.cyberbits.defcon.data.entity.VolumeRecordEntity
         ArticleEntity::class, DefconHistoryEntity::class, StickyLevelEntity::class,
         DedupRecordEntity::class, VolumeRecordEntity::class, CveRecordEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)

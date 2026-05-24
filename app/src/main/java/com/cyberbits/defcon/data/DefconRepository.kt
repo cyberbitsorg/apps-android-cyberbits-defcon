@@ -46,6 +46,7 @@ class DefconRepository(
             volumeBonus = latest.volumeBonus,
             triggerLabel = latest.triggerRaw,
             triggerArticleTitle = latest.triggerArticleTitle,
+            triggerArticlePublishedAt = latest.triggerArticlePublishedAt,
         )
         return DefconStatus(
             score = latest.score,

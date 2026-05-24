@@ -23,6 +23,7 @@ data class GlobalScoreResult(
     val volumeBonus: Double,
     val trigger: TriggerType?,
     val triggerArticleTitle: String?,
+    val triggerArticlePublishedAt: Long? = null,
 )
 
 object Scorer {
@@ -135,6 +136,7 @@ object Scorer {
             volumeBonus = round2(volumeBonus),
             trigger = winner?.trigger,
             triggerArticleTitle = winner?.title,
+            triggerArticlePublishedAt = winner?.publishedAt,
         )
     }
 

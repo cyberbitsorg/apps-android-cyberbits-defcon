@@ -5,6 +5,7 @@ data class DefconBreakdown(
     val volumeBonus: Double,            // 0–10
     val triggerLabel: String? = null,   // e.g. "Active Exploitation" (filled in by FetchCoordinator)
     val triggerArticleTitle: String? = null,
+    val triggerArticlePublishedAt: Long? = null,
 ) {
     val total: Double get() = (weightedMax + volumeBonus).coerceAtMost(100.0)
 }

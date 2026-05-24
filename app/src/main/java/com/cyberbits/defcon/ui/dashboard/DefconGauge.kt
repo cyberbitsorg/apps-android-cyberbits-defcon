@@ -30,9 +30,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import android.text.format.DateUtils
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cyberbits.defcon.model.DefconStatus
@@ -109,18 +113,30 @@ private fun DriverRow(status: DefconStatus?, color: Color) {
             label = "Elevated"; title = "by recent activity"
         }
     }
+    val publishedAt = status?.breakdown?.triggerArticlePublishedAt
+    val age = publishedAt?.let { relativeAge(it) }
+    val mutedColor = textSecondary()
     Column {
         SectionHeader("Driver", tracking = 1f)
         Spacer(Modifier.height(2.dp))
         Text(
-            buildString {
+            buildAnnotatedString {
                 append(label)
                 if (!title.isNullOrEmpty()) append(": $title")
+                if (!age.isNullOrEmpty()) {
+                    withStyle(SpanStyle(color = mutedColor)) { append(" · $age") }
+                }
             },
             style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color),
             maxLines = 2,
         )
     }
+}
+
+private fun relativeAge(epochMillis: Long, nowMillis: Long = System.currentTimeMillis()): String {
+    return DateUtils.getRelativeTimeSpanString(
+        epochMillis, nowMillis, DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE
+    ).toString()
 }
 
 @Composable

@@ -140,6 +140,7 @@ class FetchCoordinator(
                 volumeBonus = global.volumeBonus,
                 triggerRaw = global.trigger?.name,
                 triggerArticleTitle = global.triggerArticleTitle,
+                triggerArticlePublishedAt = global.triggerArticlePublishedAt,
             )
         )
 
@@ -196,6 +197,7 @@ class FetchCoordinator(
                 volumeBonus = global.volumeBonus,
                 triggerRaw = global.trigger?.name,
                 triggerArticleTitle = global.triggerArticleTitle,
+                triggerArticlePublishedAt = global.triggerArticlePublishedAt,
             )
         )
         defcon.currentStatus()

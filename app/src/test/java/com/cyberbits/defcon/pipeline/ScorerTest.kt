@@ -91,4 +91,20 @@ class ScorerTest {
         assertEquals(90.0 * 22.0 / 72.0, r72.weightedMax, 0.1)
     }
 
+    @Test fun triggerArticlePublishedAtPropagates() {
+        val now = 1_700_000_000_000L
+        val h = 3600_000L
+        val publishedAt = now - 2L * h
+        val window = listOf(
+            Scorer.WindowArticle("winner", 80.0, null, publishedAt),
+            Scorer.WindowArticle("loser", 30.0, null, now - 1L * h),
+        )
+        val r = Scorer.computeGlobalScore(window, newCount = 0, baseline = null, now = now, windowHours = 48.0)
+        assertEquals(publishedAt, r.triggerArticlePublishedAt)
+    }
+
+    @Test fun triggerArticlePublishedAtNullForEmptyWindow() {
+        val r = Scorer.computeGlobalScore(emptyList(), newCount = 0, baseline = null, now = 1L, windowHours = 48.0)
+        assertEquals(null, r.triggerArticlePublishedAt)
+    }
 }

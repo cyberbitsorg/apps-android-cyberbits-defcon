@@ -14,4 +14,5 @@ data class DefconHistoryEntity(
     val volumeBonus: Double,
     val triggerRaw: String?,
     val triggerArticleTitle: String?,
+    val triggerArticlePublishedAt: Long? = null,
 )
