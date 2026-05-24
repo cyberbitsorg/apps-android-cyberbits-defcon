@@ -35,7 +35,8 @@ object Scorer {
         val publishedAt: Long, // epoch millis
     )
 
-    private const val windowHours: Double = 24.0
+    private const val WINDOW_HOURS_WEEKDAY: Double = 48.0
+    private const val WINDOW_HOURS_WEEKEND: Double = 72.0
     private const val volumeBonusCap: Double = 10.0
     private const val impactCap: Double = 12.0
     private const val densityCap: Double = 2.0
@@ -91,17 +92,30 @@ object Scorer {
 
     // MARK: - Global (v2)
 
+    /**
+     * Weekend-aware default decay window. Saturday/Sunday in UTC uses 72h,
+     * weekdays use 48h. Lets news from late Friday survive the quiet weekend.
+     */
+    fun currentWindowHours(nowMillis: Long = System.currentTimeMillis()): Double {
+        val day = java.time.Instant.ofEpochMilli(nowMillis)
+            .atZone(java.time.ZoneOffset.UTC).dayOfWeek
+        return if (day == java.time.DayOfWeek.SATURDAY || day == java.time.DayOfWeek.SUNDAY)
+            WINDOW_HOURS_WEEKEND else WINDOW_HOURS_WEEKDAY
+    }
+
     fun computeGlobalScore(
         window: List<WindowArticle>,
         newCount: Int,
         baseline: Double?,
         now: Long = System.currentTimeMillis(),
+        windowHours: Double? = null,
     ): GlobalScoreResult {
+        val activeWindow = windowHours ?: currentWindowHours(now)
         var weightedMax = 0.0
         var winner: WindowArticle? = null
         for (art in window) {
             val ageHours = (now - art.publishedAt).toDouble() / 3_600_000.0
-            val weight = max(0.0, 1.0 - ageHours / windowHours)
+            val weight = max(0.0, 1.0 - ageHours / activeWindow)
             val contribution = art.score * weight
             if (contribution > weightedMax) {
                 weightedMax = contribution
