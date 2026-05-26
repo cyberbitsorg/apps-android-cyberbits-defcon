@@ -57,10 +57,17 @@ object Scorer {
         val titleBoost = min(titleRaw.toDouble() / 8.0, 1.0) * 20.0
 
         val trackBUnc = cve + impact + keywords + titleBoost
-        val trackB = min(trackBUnc, 80.0)
+        var trackB = min(trackBUnc, 80.0)
+
+        val isNewsletter = Triggers.isNewsletterTitle(title)
+        if (isNewsletter) {
+            // Recaps bundle many unrelated threats; keyword density inflates Track B
+            // even though no single item carries a dense article's severity.
+            trackB *= 0.5
+        }
 
         var triggerMatch = Triggers.detect(text)
-        if (triggerMatch != null && Triggers.isNewsletterTitle(title)) {
+        if (triggerMatch != null && isNewsletter) {
             triggerMatch = null
         }
 
