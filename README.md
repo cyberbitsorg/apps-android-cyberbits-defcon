@@ -38,3 +38,7 @@ Or open the project in Android Studio and run the `app` configuration on an emul
 - [app/src/main/res/](app/src/main/res/) Resources, including launcher icon derived from the iOS `AppIcon.png`
 - [app/src/test/](app/src/test/) Unit tests
 - [app/src/androidTest/](app/src/androidTest/) Instrumented tests
+
+## License
+
+GNU General Public License v3.0. See [LICENSE](LICENSE) for details.
