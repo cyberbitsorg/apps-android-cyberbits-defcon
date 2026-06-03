@@ -1,19 +1,18 @@
 [versions]
-agp = "8.9.1"
-kotlin = "2.0.21"
-ksp = "2.0.21-1.0.27"
-compose-bom = "2024.12.01"
-activity-compose = "1.9.3"
-lifecycle = "2.8.7"
-navigation-compose = "2.8.4"
-room = "2.6.1"
-datastore = "1.1.1"
-workmanager = "2.10.0"
-okhttp = "4.12.0"
-kotlinx-serialization = "1.7.3"
-vico = "2.0.0-beta.3"
-coroutines = "1.9.0"
-core-ktx = "1.15.0"
+agp = "9.2.0"
+kotlin = "2.3.20"
+ksp = "2.3.9"
+compose-bom = "2026.05.01"
+activity-compose = "1.13.0"
+lifecycle = "2.10.0"
+room = "2.8.4"
+datastore = "1.2.1"
+workmanager = "2.11.2"
+okhttp = "5.3.0"
+kotlinx-serialization = "1.10.0"
+vico = "2.4.3"
+coroutines = "1.11.0"
+core-ktx = "1.16.0"
 junit = "4.13.2"
 androidx-test = "1.6.1"
 androidx-test-runner = "1.6.2"
@@ -32,7 +31,6 @@ compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive-navigation = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
 compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
@@ -52,7 +50,6 @@ room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -103,7 +103,7 @@ private fun DriverRow(status: DefconStatus?, color: Color) {
     val title: String?
     when {
         status?.breakdown?.triggerLabel != null -> {
-            label = status.breakdown.triggerLabel!!
+            label = status.breakdown.triggerLabel
             title = status.breakdown.triggerArticleTitle
         }
         (status?.score ?: 0.0) == 0.0 -> {

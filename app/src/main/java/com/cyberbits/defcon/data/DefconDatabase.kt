@@ -38,7 +38,7 @@ abstract class DefconDatabase : RoomDatabase() {
     companion object {
         fun build(context: Context): DefconDatabase =
             Room.databaseBuilder(context, DefconDatabase::class.java, "defcon.db")
-                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }
 }

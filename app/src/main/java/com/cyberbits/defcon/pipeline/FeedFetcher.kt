@@ -30,7 +30,7 @@ open class FeedFetcher(
                 if (!resp.isSuccessful) {
                     FetchResult(source, null, RuntimeException("HTTP ${resp.code}"))
                 } else {
-                    FetchResult(source, resp.body?.string(), null)
+                    FetchResult(source, resp.body.string(), null)
                 }
             }
         } catch (t: Throwable) {
