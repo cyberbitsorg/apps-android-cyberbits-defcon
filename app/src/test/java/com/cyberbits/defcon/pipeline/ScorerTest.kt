@@ -107,4 +107,70 @@ class ScorerTest {
         val r = Scorer.computeGlobalScore(emptyList(), newCount = 0, baseline = null, now = 1L, windowHours = 48.0)
         assertEquals(null, r.triggerArticlePublishedAt)
     }
+
+    // --- distribution-aware aggregation: one lone article must not max the gauge ---
+
+    @Test fun globalScoreLoneHighNonToptierPulledDownByDistribution() {
+        val now = 1_700_000_000_000L
+        val window = listOf(
+            Scorer.WindowArticle("lone", 65.0, TriggerType.MALWARE_CAMPAIGN, now),
+            Scorer.WindowArticle("second", 45.0, null, now),
+            Scorer.WindowArticle("low1", 10.0, null, now),
+            Scorer.WindowArticle("low2", 5.0, null, now),
+        )
+        val r = Scorer.computeGlobalScore(window, newCount = 0, baseline = null, now = now, windowHours = 48.0)
+        assertEquals(0.6 * 65 + 0.4 * 45, r.weightedMax, 0.1) // 57, not 65
+        assertTrue("lone article no longer drives gauge", r.weightedMax < 65.0)
+        assertEquals("lone", r.triggerArticleTitle)
+    }
+
+    @Test fun globalScoreToptierSingleEventStillSpikes() {
+        val now = 1_700_000_000_000L
+        val window = listOf(
+            Scorer.WindowArticle("crit", 80.0, TriggerType.ACTIVE_EXPLOITATION, now),
+            Scorer.WindowArticle("low1", 20.0, null, now),
+            Scorer.WindowArticle("low2", 15.0, null, now),
+        )
+        val r = Scorer.computeGlobalScore(window, newCount = 0, baseline = null, now = now, windowHours = 48.0)
+        assertEquals(80.0, r.weightedMax, 0.1)
+        assertEquals(TriggerType.ACTIVE_EXPLOITATION, r.trigger)
+        assertEquals("crit", r.triggerArticleTitle)
+    }
+
+    @Test fun globalScoreMalwareCampaignDoesNotGetSpikeCarveout() {
+        val now = 1_700_000_000_000L
+        val window = listOf(
+            Scorer.WindowArticle("lone", 65.0, TriggerType.MALWARE_CAMPAIGN, now),
+            Scorer.WindowArticle("second", 30.0, null, now),
+        )
+        val r = Scorer.computeGlobalScore(window, newCount = 0, baseline = null, now = now, windowHours = 48.0)
+        assertEquals(0.6 * 65 + 0.4 * 30, r.weightedMax, 0.1) // 51, not 65
+    }
+
+    @Test fun globalScoreTwoHighArticlesReachLevel2() {
+        val now = 1_700_000_000_000L
+        val window = listOf(
+            Scorer.WindowArticle("a", 65.0, TriggerType.MALWARE_CAMPAIGN, now),
+            Scorer.WindowArticle("b", 62.0, TriggerType.MALWARE_CAMPAIGN, now),
+        )
+        val r = Scorer.computeGlobalScore(window, newCount = 0, baseline = null, now = now, windowHours = 48.0)
+        assertEquals(0.6 * 65 + 0.4 * 62, r.weightedMax, 0.1) // 63.8
+        assertEquals(2, Scorer.levelFromScore(r.score))
+    }
+
+    // --- volume bonus baseline floor: sparse per-cycle counts must not saturate ---
+
+    @Test fun volumeBonusLowBaselineSingleArticleNoBonus() {
+        val now = 1_700_000_000_000L
+        val window = listOf(Scorer.WindowArticle("a", 50.0, null, now))
+        val r = Scorer.computeGlobalScore(window, newCount = 1, baseline = 0.16, now = now, windowHours = 48.0)
+        assertEquals(0.0, r.volumeBonus, 0.001)
+    }
+
+    @Test fun volumeBonusFloorRequiresRealSurge() {
+        val now = 1_700_000_000_000L
+        val window = listOf(Scorer.WindowArticle("a", 50.0, null, now))
+        val r = Scorer.computeGlobalScore(window, newCount = 3, baseline = 0.5, now = now, windowHours = 48.0)
+        assertEquals(0.0, r.volumeBonus, 0.001)
+    }
 }

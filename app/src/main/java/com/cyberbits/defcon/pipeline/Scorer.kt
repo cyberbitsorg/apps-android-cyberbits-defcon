@@ -42,6 +42,23 @@ object Scorer {
     private const val impactCap: Double = 12.0
     private const val densityCap: Double = 2.0
 
+    // Distribution-aware aggregation: the global score is a weighted blend of the two
+    // highest-scoring articles, so one lone article can no longer max the gauge.
+    private const val blendW1: Double = 0.6
+    private const val blendW2: Double = 0.4
+
+    // Single-event spike carve-out: only decisive top-tier triggers may still drive the
+    // gauge on their own (the point of a DEFCON spike). Mid-tier triggers (malware/apt/
+    // breach…) must be corroborated by the wider field via the blend.
+    private val spikeTriggers: Set<TriggerType> = setOf(
+        TriggerType.ACTIVE_EXPLOITATION, TriggerType.KEV_ADDITION, TriggerType.CEILING_CVSS,
+    )
+
+    // Absolute floor for the volume baseline. On-device per-cycle counts are sparse
+    // (often 0–1 after dedup), so the raw baseline (~0.16) makes a single new article
+    // look like a multi-x surge. Flooring keeps the bonus dormant unless there is a flood.
+    private const val minVolumeBaseline: Double = 5.0
+
     // MARK: - Per-article (v2)
 
     fun computeArticleScore(title: String, summary: String): ArticleScoreResult {
@@ -119,20 +136,47 @@ object Scorer {
         windowHours: Double? = null,
     ): GlobalScoreResult {
         val activeWindow = windowHours ?: currentWindowHours(now)
-        var weightedMax = 0.0
-        var winner: WindowArticle? = null
-        for (art in window) {
-            val ageHours = (now - art.publishedAt).toDouble() / 3_600_000.0
-            val weight = max(0.0, 1.0 - ageHours / activeWindow)
-            val contribution = art.score * weight
-            if (contribution > weightedMax) {
-                weightedMax = contribution
-                winner = art
+
+        // Weighted score per article, sorted most-significant first.
+        val scored = window
+            .map { art ->
+                val ageHours = (now - art.publishedAt).toDouble() / 3_600_000.0
+                val weight = max(0.0, 1.0 - ageHours / activeWindow)
+                (art.score * weight) to art
+            }
+            .sortedByDescending { it.first }
+
+        // Distribution blend of the top two weighted articles.
+        val (blend, blendWinner) = when {
+            scored.isEmpty() -> 0.0 to null
+            scored.size == 1 -> scored[0].first to scored[0].second
+            else -> (blendW1 * scored[0].first + blendW2 * scored[1].first) to scored[0].second
+        }
+
+        // Single-event spike carve-out: highest weighted top-tier-trigger article.
+        var spikeMax = 0.0
+        var spikeWinner: WindowArticle? = null
+        for ((ws, art) in scored) {
+            val t = art.trigger
+            if (t != null && t in spikeTriggers && ws > spikeMax) {
+                spikeMax = ws
+                spikeWinner = art
             }
         }
 
+        val weightedMax: Double
+        val winner: WindowArticle?
+        if (spikeMax > blend) {
+            weightedMax = spikeMax
+            winner = spikeWinner
+        } else {
+            weightedMax = blend
+            winner = blendWinner
+        }
+
         val volumeBonus: Double = if (baseline != null && baseline > 0) {
-            val ratio = newCount.toDouble() / baseline
+            val effectiveBaseline = max(baseline, minVolumeBaseline)
+            val ratio = newCount.toDouble() / effectiveBaseline
             max(0.0, min((ratio - 1.0) * 10.0, volumeBonusCap))
         } else 0.0
 
