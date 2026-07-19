@@ -60,7 +60,7 @@ object Deduplicator {
         "vmware" to "fusion",
         "citrix" to "netscaler", "citrix" to "adc",
         "sonicwall" to "sma", "sonicwall" to "firewall",
-        "oracle" to "weblogic", "oracle" to "java",
+        "oracle" to "weblogic", "oracle" to "java", "oracle" to "peoplesoft", "oracle" to "e-business",
         "openssh" to "", "openssl" to "", "nginx" to "", "apache" to "struts",
         "wordpress" to "", "drupal" to "",
     )

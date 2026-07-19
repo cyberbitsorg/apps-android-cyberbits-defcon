@@ -8,6 +8,7 @@ object Triggers {
         TriggerType.KEV_ADDITION,
         TriggerType.CEILING_CVSS,
         TriggerType.SUPPLY_CHAIN_COMPROMISE,
+        TriggerType.PUBLIC_EXPLOIT,
         TriggerType.CRITICAL_SCOPE_VULN,
         TriggerType.CONFIRMED_BREACH,
         TriggerType.APT_CAMPAIGN,
@@ -17,7 +18,8 @@ object Triggers {
     /**
      * Detect the highest-precedence trigger in `text`. Returns null if none match.
      * `text` must be pre-lowercased. Contest/bug-bounty contexts (Pwn2Own, CTF,
-     * HackerOne) exclude active_exploitation, kev_addition, critical_scope_vuln.
+     * HackerOne) exclude active_exploitation, kev_addition, ceiling_cvss,
+     * critical_scope_vuln and public_exploit.
      */
     fun detect(text: String): TriggerMatch? {
         val contest = isContestContext(text)
@@ -25,7 +27,8 @@ object Triggers {
             if (contest && (trigger == TriggerType.ACTIVE_EXPLOITATION ||
                             trigger == TriggerType.KEV_ADDITION ||
                             trigger == TriggerType.CEILING_CVSS ||
-                            trigger == TriggerType.CRITICAL_SCOPE_VULN)) {
+                            trigger == TriggerType.CRITICAL_SCOPE_VULN ||
+                            trigger == TriggerType.PUBLIC_EXPLOIT)) {
                 continue
             }
             val matched = match(trigger, text)
@@ -145,6 +148,21 @@ object Triggers {
     private val supplyChainScalePattern =
         """\b(\d{1,3}(?:,\d{3})+|\d{2,}|hundreds|thousands|dozens)\b"""
 
+    // public_exploit: working exploit / PoC code publicly released for a vulnerability
+    private val publicExploitReleasePatterns: List<String> = listOf(
+        """\bexploit code\b""",
+        """\bpublic(?:ly available)? exploit\b""",
+        """\bproof[- ]of[- ]concept\b""",
+        """\bpoc\s+(?:exploit|code|available|released|published|now public)\b""",
+        """\b(released?|releases?|publish(?:ed|es)?|drops?|dropped|posts?|posted|leak(?:ed|s)?)\b[^.\n]{0,40}\bexploit\b""",
+        """\bexploit\b[^.\n]{0,25}\b(released?|published|now public|posted|available online|now available)\b""",
+    )
+
+    // A release signal alone is generic — require a concrete vulnerability indicator too.
+    private val exploitVulnIndicatorPattern =
+        """\b(0[- ]?day|zero[- ]?day|bypass(?:es|ed)?|rce|remote code execution|flaw|bug|""" +
+        """vulnerabilit(?:y|ies)|cve|privilege escalation|unauthenticated|backdoor)\b"""
+
     private val contestPattern =
         """\bpwn2own\b|\bcapture[- ]the[- ]flag\b|\bctf\b|\bhack(?:athon|fest|the box)\b|""" +
         """\bbug bounty\b|\bdef ?con (?:ctf|village|finals?)\b|\bhackone\b|\bhackerone\b|""" +
@@ -213,6 +231,21 @@ object Triggers {
                 if (!cachedRegex(supplyChainBadnessPattern).containsMatchIn(text)) return null
                 if (!cachedRegex(supplyChainScalePattern).containsMatchIn(text)) return null
                 return artifact.value
+            }
+
+            TriggerType.PUBLIC_EXPLOIT -> {
+                if (!cachedRegex(exploitVulnIndicatorPattern).containsMatchIn(text)) return null
+                for (pattern in publicExploitReleasePatterns) {
+                    for (m in cachedRegex(pattern).findAll(text)) {
+                        // Pre-window negation ("no public exploit") + intra-span negation
+                        // ("exploit ... has not been released").
+                        val pre = text.substring(maxOf(0, m.range.first - 30), m.range.first)
+                        if (cachedRegex(negationPattern).containsMatchIn(pre)) continue
+                        if (cachedRegex(negationPattern).containsMatchIn(m.value)) continue
+                        return m.value
+                    }
+                }
+                return null
             }
 
             TriggerType.MALWARE_CAMPAIGN -> {

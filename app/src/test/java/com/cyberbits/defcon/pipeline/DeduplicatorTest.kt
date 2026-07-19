@@ -64,4 +64,12 @@ class DeduplicatorTest {
         val out = Deduplicator.deduplicate(listOf(incoming), emptySet(), recent)
         assertEquals("near-duplicate dropped by Jaccard >= 0.28", 0, out.size)
     }
+
+    @Test fun l0cOraclePeoplesoftPairDropsDuplicate() {
+        // Shared vendor+product "oracle peoplesoft" + shared extra token ("day") → deduped.
+        val recent = listOf("Oracle mitigates PeopleSoft zero-day exploited in attacks")
+        val incoming = art("ShinyHunters hacked 100 orgs via Oracle PeopleSoft 0-day")
+        val out = Deduplicator.deduplicate(listOf(incoming), emptySet(), recent)
+        assertEquals("oracle peoplesoft pair dropped by L0c", 0, out.size)
+    }
 }

@@ -2,7 +2,8 @@ package com.cyberbits.defcon.pipeline
 
 object Vocabulary {
     val tier1: List<String> = listOf(
-        "zero-day", "zero day", "nation-state", "nation state",
+        "zero-day", "zero day", "0-day", "0day", "0 day",
+        "nation-state", "nation state",
         "state-sponsored", "state sponsored",
         "ransomware attack", "critical infrastructure",
         "infostealer", "stealer campaign", "malware campaign",
@@ -60,5 +61,5 @@ object Vocabulary {
      * Short terms that need word-boundary matching to avoid false positives
      * ("rce" in "force", "apt" in "capture", "rat" in "rate").
      */
-    val wordBoundaryRequired: Set<String> = setOf("rce", "apt", "rat")
+    val wordBoundaryRequired: Set<String> = setOf("rce", "apt", "rat", "0-day", "0day", "0 day")
 }

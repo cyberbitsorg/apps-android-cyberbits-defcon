@@ -21,6 +21,25 @@ class ScorerTest {
         assertEquals(TriggerType.ACTIVE_EXPLOITATION, r.trigger)
     }
 
+    @Test fun publicExploitBitlockerZeroDayScores() {
+        val r = Scorer.computeArticleScore(
+            "Microsoft's worst 'Nightmare' unleashes BitLocker bypass 0-day",
+            "Another day, another Windows exploit code"
+        )
+        assertEquals(TriggerType.PUBLIC_EXPLOIT, r.trigger)
+        assertTrue("score should be >= public_exploit base 65", r.score >= 65.0)
+    }
+
+    @Test fun publicExploitPublishedDefenderExploitScores() {
+        val r = Scorer.computeArticleScore(
+            "New GreatXML Exploit Bypasses Windows BitLocker via Recovery Partition XML Files",
+            "Security researcher has released a new Windows BitLocker bypass dubbed GreatXML, " +
+                "a day after they published an exploit for Microsoft Defender."
+        )
+        assertEquals(TriggerType.PUBLIC_EXPLOIT, r.trigger)
+        assertTrue("score should be >= public_exploit base 65", r.score >= 65.0)
+    }
+
     @Test fun newsletterTitleSuppressesTrigger() {
         val r = Scorer.computeArticleScore(
             "Weekly Roundup: actively exploited zero-day in chrome",

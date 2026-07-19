@@ -8,7 +8,7 @@ class VocabularyTest {
 
     @Test fun tier1ContainsExpectedTerms() {
         assertTrue(Vocabulary.tier1.isNotEmpty())
-        assertEquals(17, Vocabulary.tier1.size)
+        assertEquals(20, Vocabulary.tier1.size)
         assertTrue("zero-day" in Vocabulary.tier1)
         assertTrue("nation-state" in Vocabulary.tier1)
         assertTrue("supply chain attack" in Vocabulary.tier1)
@@ -36,7 +36,19 @@ class VocabularyTest {
 
     @Test fun wordBoundarySetIsNonEmpty() {
         assertTrue(Vocabulary.wordBoundaryRequired.isNotEmpty())
-        assertEquals(setOf("rce", "apt", "rat"), Vocabulary.wordBoundaryRequired)
+        assertEquals(setOf("rce", "apt", "rat", "0-day", "0day", "0 day"), Vocabulary.wordBoundaryRequired)
+    }
+
+    @Test fun tier1ContainsNumericZeroDaySpellings() {
+        assertTrue("0-day" in Vocabulary.tier1)
+        assertTrue("0day" in Vocabulary.tier1)
+        assertTrue("0 day" in Vocabulary.tier1)
+    }
+
+    @Test fun wordBoundaryRequiredContainsNumericZeroDaySpellings() {
+        assertTrue("0-day" in Vocabulary.wordBoundaryRequired)
+        assertTrue("0day" in Vocabulary.wordBoundaryRequired)
+        assertTrue("0 day" in Vocabulary.wordBoundaryRequired)
     }
 
     @Test fun criticalSectorsContainCoreEntries() {

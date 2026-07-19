@@ -146,4 +146,48 @@ class TriggersTest {
         val text = "actively exploited flaw in 5,000 repos with malicious workflows"
         assertEquals(TriggerType.ACTIVE_EXPLOITATION, Triggers.detect(text.lowercase())?.trigger)
     }
+
+    // public_exploit: working exploit / PoC code publicly released for a vulnerability
+
+    @Test fun publicExploit_exploitCodeForZeroDay() {
+        val text = "microsoft's worst nightmare unleashes bitlocker bypass 0-day, another windows exploit code"
+        val m = Triggers.detect(text.lowercase())
+        assertNotNull(m)
+        assertEquals(TriggerType.PUBLIC_EXPLOIT, m?.trigger)
+    }
+
+    @Test fun publicExploit_publishedExploitForBypass() {
+        val text = "security researcher has released a new windows bitlocker bypass dubbed greatxml, " +
+            "a day after they published an exploit for microsoft defender"
+        val m = Triggers.detect(text.lowercase())
+        assertNotNull(m)
+        assertEquals(TriggerType.PUBLIC_EXPLOIT, m?.trigger)
+    }
+
+    @Test fun publicExploit_proofOfConcept() {
+        val text = "researcher drops proof-of-concept exploit for unpatched fortinet rce flaw"
+        val m = Triggers.detect(text.lowercase())
+        assertNotNull(m)
+        assertEquals(TriggerType.PUBLIC_EXPLOIT, m?.trigger)
+    }
+
+    @Test fun publicExploit_yieldsToActiveExploitation() {
+        val text = "exploit code released for zero-day now actively exploited in the wild"
+        assertEquals(TriggerType.ACTIVE_EXPLOITATION, Triggers.detect(text.lowercase())?.trigger)
+    }
+
+    @Test fun publicExploit_negatedNotDetected() {
+        val text = "critical flaw disclosed but no public exploit is available yet"
+        assertNotEquals(TriggerType.PUBLIC_EXPLOIT, Triggers.detect(text.lowercase())?.trigger)
+    }
+
+    @Test fun publicExploit_couldBeExploitedNoReleaseSignal() {
+        val text = "vendor warns the bug could be exploited by attackers in the future"
+        assertNotEquals(TriggerType.PUBLIC_EXPLOIT, Triggers.detect(text.lowercase())?.trigger)
+    }
+
+    @Test fun publicExploit_contestExcluded() {
+        val text = "researcher released exploit code for windows zero-day at pwn2own berlin"
+        assertNotEquals(TriggerType.PUBLIC_EXPLOIT, Triggers.detect(text.lowercase())?.trigger)
+    }
 }
