@@ -8,7 +8,6 @@ Android companion to the iOS [Defcon Dash](https://github.com/cyberbitsorg/apps-
 - Room (SQLite) for article cache, DataStore for preferences
 - WorkManager for periodic refresh
 - OkHttp + kotlinx.serialization for the feed API
-- Vico for charts
 - `minSdk` 26, `targetSdk` 36, JVM 17
 
 ## Build & run

@@ -1,6 +1,7 @@
 package com.cyberbits.defcon.notification
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -33,6 +34,8 @@ class DefconNotifier(private val context: Context) {
         context, Manifest.permission.POST_NOTIFICATIONS
     ) == PackageManager.PERMISSION_GRANTED
 
+    // canPost() guards POST_NOTIFICATIONS; lint can't trace the check through the helper.
+    @SuppressLint("MissingPermission")
     fun postDefconLevel(level: Int, label: String) {
         if (!canPost()) return
         val intent = PendingIntent.getActivity(
@@ -49,6 +52,7 @@ class DefconNotifier(private val context: Context) {
         NotificationManagerCompat.from(context).notify(1001, n)
     }
 
+    @SuppressLint("MissingPermission")
     fun postNewArticles(count: Int) {
         if (!canPost() || count <= 0) return
         val intent = PendingIntent.getActivity(

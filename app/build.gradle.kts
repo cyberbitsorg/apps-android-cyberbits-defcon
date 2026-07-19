@@ -7,14 +7,14 @@ plugins {
 
 android {
     namespace = "com.cyberbits.defcon"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.cyberbits.defcon"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -53,8 +53,6 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.vico.compose.m3)
-    implementation(libs.vico.compose)
 
     debugImplementation(libs.compose.ui.tooling)
 
