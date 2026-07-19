@@ -2,6 +2,9 @@
 
 Android companion to the iOS [Defcon Dash](https://github.com/cyberbitsorg/apps-ios-cyberbits-defcon) app. Surfaces the current cyber threat level with supporting indicators and a feed of recent security articles.
 
+> [!NOTE]
+> **Not yet on the Play Store.** The app is feature-complete and builds/runs on a device, but the actual Play Store release (Play Console enrollment, app signing, screenshots, review submission) is still a TODO. It's deferred for now given the time, effort, and cost involved, and will be done at a later date.
+
 ## Stack
 
 - Kotlin + Jetpack Compose (Material 3)
