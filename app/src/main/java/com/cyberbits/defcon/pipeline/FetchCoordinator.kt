@@ -6,6 +6,7 @@ import com.cyberbits.defcon.data.DedupRepository
 import com.cyberbits.defcon.data.DefconRepository
 import com.cyberbits.defcon.data.SettingsRepository
 import com.cyberbits.defcon.data.VolumeRepository
+import com.cyberbits.defcon.data.entity.ArticleEntity
 import com.cyberbits.defcon.data.entity.DefconHistoryEntity
 import com.cyberbits.defcon.model.DefconStatus
 import com.cyberbits.defcon.model.FeedSource
@@ -108,54 +109,20 @@ class FetchCoordinator(
         cves.trim(now)
         volume.record(newCount, now)
         volume.trim()
+        defcon.trimHistory(now)
 
-        // 6. Global DEFCON over 20 most recent
-        val windowArticles = articles.mostRecent(20)
-        val window = windowArticles.map { a ->
-            Scorer.WindowArticle(a.title, a.defconScore, null, a.publishedAt)
-        }
-        val baseline = volume.baseline()
-        val global = Scorer.computeGlobalScore(window, newCount, baseline, now)
-        val rawLevel = Scorer.levelFromScore(global.score)
-
-        // 7. Sticky level
-        val sticky = defcon.readSticky()
-        val anchor = evidenceAnchor(sticky?.floor, windowArticles.map { it.publishedAt to it.defconScore })
-        val stickyR = StickyLevel.computeDisplayedLevel(
-            rawLevel = rawLevel,
-            state = StickyLevel.State(sticky?.floor, sticky?.untilAt),
-            evidenceAnchor = anchor,
-            now = now,
-        )
-        defcon.writeSticky(stickyR.newFloor, stickyR.newUntilAt)
-        val displayedLevel = stickyR.displayedLevel
-
-        defcon.insertHistory(
-            DefconHistoryEntity(
-                id = UUID.randomUUID().toString(),
-                score = global.score,
-                level = displayedLevel,
-                computedAt = now,
-                weightedMax = global.weightedMax,
-                volumeBonus = global.volumeBonus,
-                triggerRaw = global.trigger?.name,
-                triggerArticleTitle = global.triggerArticleTitle,
-                triggerArticlePublishedAt = global.triggerArticlePublishedAt,
-            )
-        )
-
-        // 8. Settings: last refreshed
+        // 6. Settings: last refreshed
         settings.setLastRefreshedAt(now)
 
-        // 9. Status
-        val status = defcon.currentStatus()
+        // 7-9. Global score over the 20 most recent, sticky level, history, status
+        val status = computeAndApplySticky(newCount)
 
         // 10. Notify (inverted DEFCON: lower level number == higher threat)
-        if (status != null && displayedLevel < prevLevel &&
-            displayedLevel <= prevSettings.notificationThreshold &&
+        if (status != null && status.level < prevLevel &&
+            status.level <= prevSettings.notificationThreshold &&
             prevSettings.defconNotificationsEnabled
         ) {
-            notifier.postDefconLevel(displayedLevel, status.label)
+            notifier.postDefconLevel(status.level, status.label)
         }
         if (newCount > 0 && prevSettings.newArticleNotificationsEnabled) {
             notifier.postNewArticles(newCount)
@@ -169,29 +136,42 @@ class FetchCoordinator(
      * decays in real time even if background refreshes were skipped.
      */
     suspend fun tickStickyLevel(): DefconStatus? = mutex.withLock {
+        val recent = articles.mostRecent(20)
+        if (recent.isEmpty()) return@withLock null
+        computeAndApplySticky(newCount = 0, windowArticles = recent)
+    }
+
+    /**
+     * Shared tail of the fetch cycle and the sticky tick: compute the global
+     * DEFCON score over the 20 most recent articles, apply the sticky-level
+     * state machine, write history, and return the current status.
+     * Mirrors iOS `computeAndApplySticky`.
+     */
+    private suspend fun computeAndApplySticky(
+        newCount: Int,
+        windowArticles: List<ArticleEntity>? = null,
+    ): DefconStatus? {
         val now = System.currentTimeMillis()
-        val windowArticles = articles.mostRecent(20)
-        if (windowArticles.isEmpty()) return@withLock null
-        val window = windowArticles.map { a ->
-            Scorer.WindowArticle(a.title, a.defconScore, null, a.publishedAt)
-        }
+        val recent = windowArticles ?: articles.mostRecent(20)
+        val window = recent.map { it.toWindowArticle() }
         val baseline = volume.baseline()
-        val global = Scorer.computeGlobalScore(window, newCount = 0, baseline = baseline, now = now)
+        val global = Scorer.computeGlobalScore(window, newCount, baseline, now)
         val rawLevel = Scorer.levelFromScore(global.score)
+
         val sticky = defcon.readSticky()
-        val anchor = evidenceAnchor(sticky?.floor, windowArticles.map { it.publishedAt to it.defconScore })
-        val r = StickyLevel.computeDisplayedLevel(
+        val anchor = evidenceAnchor(sticky?.floor, recent.map { it.publishedAt to it.defconScore })
+        val stickyR = StickyLevel.computeDisplayedLevel(
             rawLevel = rawLevel,
             state = StickyLevel.State(sticky?.floor, sticky?.untilAt),
             evidenceAnchor = anchor,
             now = now,
         )
-        defcon.writeSticky(r.newFloor, r.newUntilAt)
+        defcon.writeSticky(stickyR.newFloor, stickyR.newUntilAt)
         defcon.insertHistory(
             DefconHistoryEntity(
                 id = UUID.randomUUID().toString(),
                 score = global.score,
-                level = r.displayedLevel,
+                level = stickyR.displayedLevel,
                 computedAt = now,
                 weightedMax = global.weightedMax,
                 volumeBonus = global.volumeBonus,
@@ -200,7 +180,7 @@ class FetchCoordinator(
                 triggerArticlePublishedAt = global.triggerArticlePublishedAt,
             )
         )
-        defcon.currentStatus()
+        return defcon.currentStatus()
     }
 
     /**
@@ -214,3 +194,15 @@ class FetchCoordinator(
             .maxOfOrNull { it.first }
     }
 }
+
+/**
+ * Window articles carry the stored per-article trigger so the single-event
+ * spike carve-out can fire — iOS passes `article.trigger` into its window.
+ */
+internal fun ArticleEntity.toWindowArticle(): Scorer.WindowArticle =
+    Scorer.WindowArticle(
+        title = title,
+        score = defconScore,
+        trigger = TriggerType.fromRaw(triggerRaw),
+        publishedAt = publishedAt,
+    )

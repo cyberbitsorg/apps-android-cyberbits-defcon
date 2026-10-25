@@ -16,6 +16,11 @@ class DefconRepository(
     private val stickyDao: StickyLevelDao,
 ) {
 
+    companion object {
+        /** Charts show 24h; keep a week. iOS never trims history — Android-side hygiene. */
+        const val HISTORY_RETENTION_MILLIS: Long = 7L * 24L * 3600L * 1000L
+    }
+
     suspend fun latestHistory(): DefconHistoryEntity? = historyDao.latest()
 
     suspend fun history(hours: Int = 24, now: Long = System.currentTimeMillis()): List<DefconHistoryEntity> {
@@ -58,6 +63,9 @@ class DefconRepository(
             computedAt = latest.computedAt,
         )
     }
+
+    suspend fun trimHistory(now: Long = System.currentTimeMillis()) =
+        historyDao.trim(now - HISTORY_RETENTION_MILLIS)
 
     suspend fun readSticky(): StickyLevelEntity? = stickyDao.read()
 
