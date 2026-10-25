@@ -6,8 +6,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.xml.sax.Attributes
+import org.xml.sax.InputSource
 import org.xml.sax.helpers.DefaultHandler
 import java.io.ByteArrayInputStream
+import java.io.StringReader
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -83,6 +85,11 @@ object FeedParser {
 
     private class FeedHandler(private val source: FeedSource) : DefaultHandler() {
         val articles = mutableListOf<RawArticle>()
+
+        // Feeds must never reference external entities: resolving to an empty source
+        // keeps a crafted feed from reading local files or probing the network (XXE).
+        override fun resolveEntity(publicId: String?, systemId: String?): InputSource =
+            InputSource(StringReader(""))
 
         private var current = ""
         private var isAtom = false
