@@ -15,9 +15,6 @@ interface DedupRecordDao {
     suspend fun allFingerprints(): List<String>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAll(items: List<DedupRecordEntity>)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(entity: DedupRecordEntity)
 
     /** Keep at most `keep` rows — delete the rest (oldest by addedAt). */

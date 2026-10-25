@@ -49,17 +49,6 @@ object Triggers {
         cachedRegex("""\bnewsletter\b|\bround\s+\d+\b|\bweekly\s+(roundup|recap|digest)\b|\bweek in (review|security)\b""")
             .containsMatchIn(title)
 
-    // MARK: - Regex cache
-
-    private val cache: MutableMap<String, Regex> = mutableMapOf()
-
-    private fun cachedRegex(pattern: String): Regex {
-        cache[pattern]?.let { return it }
-        val r = Regex(pattern, setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
-        cache[pattern] = r
-        return r
-    }
-
     // MARK: - Patterns
 
     private val activeExploitationPatterns: List<String> = listOf(

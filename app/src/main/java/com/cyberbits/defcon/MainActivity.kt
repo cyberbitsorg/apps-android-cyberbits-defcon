@@ -19,9 +19,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val now = System.currentTimeMillis()
             if (container.settingsRepository.needsRefresh(now)) {
-                container.appState.isRefreshing.value = true
-                container.appState.defconStatus.value = container.fetchCoordinator.runFetchCycle()
-                container.appState.isRefreshing.value = false
+                container.fetchPublishingState()
             } else {
                 container.appState.defconStatus.value = container.fetchCoordinator.tickStickyLevel()
             }

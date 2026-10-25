@@ -17,10 +17,6 @@ class CveRepository(private val dao: CveRecordDao) {
     suspend fun recentCVEs(now: Long = System.currentTimeMillis()): Set<String> =
         dao.cveIdsSince(now - TTL_MILLIS).toSet()
 
-    suspend fun record(cveId: String, now: Long = System.currentTimeMillis()) {
-        dao.upsertAll(listOf(CveRecordEntity(cveId = cveId, seenAt = now)))
-    }
-
     suspend fun recordAll(cveIds: Collection<String>, now: Long = System.currentTimeMillis()) {
         if (cveIds.isEmpty()) return
         dao.upsertAll(cveIds.map { CveRecordEntity(cveId = it, seenAt = now) })

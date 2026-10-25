@@ -8,9 +8,6 @@ import com.cyberbits.defcon.data.entity.CveRecordEntity
 
 @Dao
 interface CveRecordDao {
-    @Query("SELECT cveId FROM cve_records")
-    suspend fun allCveIds(): List<String>
-
     @Query("SELECT cveId FROM cve_records WHERE seenAt >= :sinceMs")
     suspend fun cveIdsSince(sinceMs: Long): List<String>
 

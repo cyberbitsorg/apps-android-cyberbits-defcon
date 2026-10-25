@@ -18,13 +18,6 @@ class ArticleRepository(private val dao: ArticleDao) {
 
     suspend fun mostRecent(limit: Int): List<ArticleEntity> = dao.mostRecent(limit)
 
-    suspend fun articlesInWindow(hours: Int = 24, now: Long = System.currentTimeMillis()): List<ArticleEntity> {
-        val sinceMs = now - hours.toLong() * 3600L * 1000L
-        return dao.articlesSince(sinceMs)
-    }
-
-    suspend fun existingFingerprints(): Set<String> = dao.allFingerprints().toSet()
-
     suspend fun existingGuids(): Set<String> = dao.allGuids().toSet()
 
     /**
@@ -100,6 +93,4 @@ class ArticleRepository(private val dao: ArticleDao) {
         dao.markAllRead(now)
 
     suspend fun markAllUnread() = dao.markAllUnread()
-
-    suspend fun countSince(sinceMs: Long): Int = dao.countSince(sinceMs)
 }

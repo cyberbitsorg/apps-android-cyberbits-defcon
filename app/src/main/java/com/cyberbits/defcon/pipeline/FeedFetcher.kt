@@ -2,9 +2,6 @@ package com.cyberbits.defcon.pipeline
 
 import com.cyberbits.defcon.model.FeedSource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -37,9 +34,4 @@ open class FeedFetcher(
             FetchResult(source, null, t)
         }
     }
-
-    suspend fun fetchAll(sources: List<FeedSource> = FeedSource.entries): List<FetchResult> =
-        coroutineScope {
-            sources.map { src -> async(Dispatchers.IO) { fetch(src) } }.awaitAll()
-        }
 }

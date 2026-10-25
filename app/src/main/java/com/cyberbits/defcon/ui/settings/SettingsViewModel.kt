@@ -40,8 +40,6 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun refreshNow() = viewModelScope.launch {
-        container.appState.isRefreshing.value = true
-        container.appState.defconStatus.value = container.fetchCoordinator.runFetchCycle()
-        container.appState.isRefreshing.value = false
+        container.fetchPublishingState()
     }
 }

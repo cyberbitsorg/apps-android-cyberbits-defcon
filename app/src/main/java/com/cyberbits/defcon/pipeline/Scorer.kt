@@ -311,13 +311,4 @@ object Scorer {
     // MARK: - Helpers
 
     private fun round2(v: Double): Double = round(v * 100) / 100
-
-    private val cache: MutableMap<String, Regex> = mutableMapOf()
-
-    private fun cachedRegex(pattern: String): Regex {
-        cache[pattern]?.let { return it }
-        val r = Regex(pattern, setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
-        cache[pattern] = r
-        return r
-    }
 }

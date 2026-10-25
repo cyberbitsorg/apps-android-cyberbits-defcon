@@ -26,8 +26,6 @@ class DashboardViewModel(private val container: AppContainer) : ViewModel() {
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun refresh() = viewModelScope.launch {
-        container.appState.isRefreshing.value = true
-        container.appState.defconStatus.value = container.fetchCoordinator.runFetchCycle()
-        container.appState.isRefreshing.value = false
+        container.fetchPublishingState()
     }
 }

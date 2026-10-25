@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.cyberbits.defcon.data.entity.ArticleEntity
-import com.cyberbits.defcon.model.FeedSource
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,9 +17,6 @@ interface ArticleDao {
 
     @Query("SELECT guid FROM articles")
     suspend fun allGuids(): List<String>
-
-    @Query("SELECT fingerprint FROM articles")
-    suspend fun allFingerprints(): List<String>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(items: List<ArticleEntity>): List<Long>
@@ -36,15 +32,6 @@ interface ArticleDao {
 
     @Query("DELETE FROM articles WHERE id IN (:ids)")
     suspend fun deleteByIds(ids: List<String>)
-
-    @Query("SELECT * FROM articles WHERE source = :source ORDER BY publishedAt DESC")
-    suspend fun bySource(source: FeedSource): List<ArticleEntity>
-
-    @Query("SELECT COUNT(*) FROM articles WHERE publishedAt >= :sinceMs")
-    suspend fun countSince(sinceMs: Long): Int
-
-    @Query("SELECT * FROM articles WHERE publishedAt >= :sinceMs ORDER BY publishedAt DESC")
-    suspend fun articlesSince(sinceMs: Long): List<ArticleEntity>
 
     @Query("SELECT COUNT(*) FROM articles WHERE guid = :guid")
     suspend fun guidCount(guid: String): Int

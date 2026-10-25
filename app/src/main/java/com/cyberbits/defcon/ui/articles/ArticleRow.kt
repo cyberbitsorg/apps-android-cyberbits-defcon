@@ -114,7 +114,7 @@ fun ArticleRow(
             ) {
                 // Slate-300 fill, uniform across sources — matches docker fallback;
                 // DEFCON-level colored border conveys severity at a glance.
-                val badgeColor = com.cyberbits.defcon.model.FeedSource.BLEEPING_COMPUTER.accentColor()
+                val badgeColor = colorHex("cbd5e1")
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))

@@ -8,6 +8,7 @@ import com.cyberbits.defcon.data.DefconDatabase
 import com.cyberbits.defcon.data.DefconRepository
 import com.cyberbits.defcon.data.SettingsRepository
 import com.cyberbits.defcon.data.VolumeRepository
+import com.cyberbits.defcon.model.DefconStatus
 import com.cyberbits.defcon.notification.DefconNotifier
 import com.cyberbits.defcon.pipeline.FetchCoordinator
 
@@ -37,5 +38,14 @@ class AppContainer(val applicationContext: Context) {
             settings = settingsRepository,
             notifier = notifier,
         )
+    }
+
+    /** Runs a fetch cycle, publishing refresh progress and status to [appState] for the UI. */
+    suspend fun fetchPublishingState(): DefconStatus? {
+        appState.isRefreshing.value = true
+        val status = fetchCoordinator.runFetchCycle()
+        appState.defconStatus.value = status
+        appState.isRefreshing.value = false
+        return status
     }
 }

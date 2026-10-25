@@ -1,7 +1,6 @@
 package com.cyberbits.defcon.ui.theme
 
 import androidx.compose.ui.graphics.Color
-import com.cyberbits.defcon.model.FeedSource
 
 /** Brand colors for the 5 DEFCON levels (matches DefconStatus.colorHexFor). */
 object DefconColors {
@@ -19,11 +18,5 @@ object DefconColors {
         4 -> level4
         5 -> level5
         else -> unknown
-    }
-
-    fun colorForSource(source: FeedSource): Color {
-        val hex = source.accentHex.removePrefix("#")
-        val argb = 0xFF000000.toInt() or hex.toLong(16).toInt()
-        return Color(argb)
     }
 }

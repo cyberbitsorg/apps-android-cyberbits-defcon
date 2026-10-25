@@ -24,8 +24,4 @@ object RefreshScheduler {
             UNIQUE, ExistingPeriodicWorkPolicy.UPDATE, request
         )
     }
-
-    fun cancel(context: Context) {
-        WorkManager.getInstance(context).cancelUniqueWork(UNIQUE)
-    }
 }

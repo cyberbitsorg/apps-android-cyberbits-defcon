@@ -30,11 +30,6 @@ data class DefconStatus(
             else -> "UNKNOWN"
         }
 
-        fun shortLabel(level: Int): String = when (level) {
-            in 1..5 -> "DEFCON $level"
-            else -> "—"
-        }
-
         /** Matches iOS Color.defcon(_:). */
         fun colorHexFor(level: Int): String = when (level) {
             1 -> "#ffffff"  // Cocked Pistol — white
