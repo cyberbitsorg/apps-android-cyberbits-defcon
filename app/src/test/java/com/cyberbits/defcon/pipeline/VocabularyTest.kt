@@ -74,4 +74,60 @@ class VocabularyTest {
         assertTrue("lumma" in Vocabulary.knownStealers)
         assertTrue("raccoon" in Vocabulary.knownStealers)
     }
+
+    @Test fun tagKeywordsHasTaxonomyKeysInOrder() {
+        val expected = listOf(
+            "attacks", "vulnerabilities", "malware", "ransomware", "breaches", "apt",
+            "fraud", "privacy", "ai", "supply-chain", "cloud", "ics-ot",
+        )
+        assertEquals(expected, Vocabulary.tagKeywords.keys.toList())
+    }
+
+    @Test fun tagKeywordListsNonEmpty() {
+        for ((tag, kws) in Vocabulary.tagKeywords) {
+            assertTrue("tagKeywords[$tag] is empty", kws.isNotEmpty())
+        }
+    }
+
+    @Test fun tagKeywordsAllLowercase() {
+        for ((tag, kws) in Vocabulary.tagKeywords) {
+            for (kw in kws) {
+                assertEquals("tagKeywords[$tag]: '$kw' not lowercase", kw, kw.lowercase())
+            }
+        }
+    }
+
+    @Test fun tagWbRequiredTokensExistInTagKeywords() {
+        for (kw in Vocabulary.tagWordBoundaryRequired) {
+            assertTrue(
+                "'$kw' in tagWordBoundaryRequired but not in any tagKeywords list",
+                Vocabulary.tagKeywords.values.any { kw in it },
+            )
+        }
+    }
+
+    @Test fun shortAmbiguousTagTokensAreWordBoundaryMatched() {
+        // "ai" in "said", "apt" in "capture", "ics" in "physics", "bec" in "because",
+        // "aws" in "lawsuit" — must not match as substrings.
+        for (kw in listOf("ai", "apt", "rat", "ics", "bec", "aws", "rce", "cve", "0-day")) {
+            assertTrue("'$kw' must be in tagWordBoundaryRequired", kw in Vocabulary.tagWordBoundaryRequired)
+        }
+    }
+
+    @Test fun tagActorGroupsAreSubsetOfThreatActors() {
+        for (group in Vocabulary.ransomwareGroups + Vocabulary.aptGroups + Vocabulary.breachGroups) {
+            assertTrue("'$group' not in threatActors", group in Vocabulary.threatActors)
+        }
+    }
+
+    @Test fun tagKeywordsReuseActorGroups() {
+        assertTrue("lockbit" in Vocabulary.tagKeywords.getValue("ransomware"))
+        assertTrue("lazarus" in Vocabulary.tagKeywords.getValue("apt"))
+        assertTrue("shinyhunters" in Vocabulary.tagKeywords.getValue("breaches"))
+    }
+
+    @Test fun fallbackTagNotInTagKeywords() {
+        // The fallback must never compete in the ranking — it only fills in after it.
+        assertTrue(Vocabulary.fallbackTag !in Vocabulary.tagKeywords)
+    }
 }

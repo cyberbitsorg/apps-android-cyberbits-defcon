@@ -40,6 +40,24 @@ import com.cyberbits.defcon.ui.theme.colorHex
 import com.cyberbits.defcon.ui.theme.textSecondary
 import com.cyberbits.defcon.ui.theme.textTertiary
 
+// Display labels for content-based article tags (canonical keys come from Tagger).
+// Unknown keys fall back to the raw key.
+private val tagLabels: Map<String, String> = mapOf(
+    "attacks" to "Attacks",
+    "vulnerabilities" to "Vulnerabilities",
+    "malware" to "Malware",
+    "ransomware" to "Ransomware",
+    "breaches" to "Breaches",
+    "apt" to "APT",
+    "fraud" to "Fraud",
+    "privacy" to "Privacy",
+    "ai" to "AI",
+    "supply-chain" to "Supply Chain",
+    "cloud" to "Cloud",
+    "ics-ot" to "ICS/OT",
+    "news" to "News",
+)
+
 @Composable
 fun ArticleRow(
     article: ArticleEntity,
@@ -139,6 +157,27 @@ fun ArticleRow(
                     style = TextStyle(fontSize = 10.sp),
                 )
                 Spacer(Modifier.weight(1f))
+                // Category tags — mirrors docker's footer pills (right-aligned before
+                // the read check); gray-100/gray-800 pill with gray-600/gray-300 label.
+                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                    article.tags.forEach { tag ->
+                        val bg = colorHex(if (isDark) "1f2937" else "f3f4f6")
+                        val fg = colorHex(if (isDark) "d1d5db" else "4b5563")
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(bg)
+                                .padding(horizontal = 6.dp, vertical = 1.dp),
+                        ) {
+                            Text(
+                                tagLabels[tag] ?: tag,
+                                color = fg,
+                                style = TextStyle(fontSize = 9.sp, fontWeight = FontWeight.Medium),
+                                maxLines = 1,
+                            )
+                        }
+                    }
+                }
                 if (article.isRead) {
                     Icon(
                         Icons.Filled.Check,

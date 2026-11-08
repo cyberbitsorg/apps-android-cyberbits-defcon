@@ -48,6 +48,9 @@ class FetchCoordinator(
         val recentTitles = dedup.recentTitles()
         val recentCves = cves.recentCVEs(now)
 
+        // 1b. One-time backfill: classify articles stored before the tags column existed.
+        articles.backfillTags(Tagger::classifyTags)
+
         // 2. Fetch concurrently
         val fetchResults = coroutineScope {
             FeedSource.entries.map { src ->
@@ -90,7 +93,7 @@ class FetchCoordinator(
         }
         val newCount = unique.size
 
-        // 4. Score + store
+        // 4. Score, tag + store
         for ((idx, article) in unique.withIndex()) {
             val s = Scorer.computeArticleScore(article.title, article.summary)
             articles.upsert(
@@ -98,6 +101,7 @@ class FetchCoordinator(
                 score = s.score,
                 triggerRaw = s.trigger?.name,
                 fingerprint = Deduplicator.fingerprint(article.title),
+                tags = Tagger.classifyTags(article.title, article.summary),
             )
             dedup.record(Deduplicator.fingerprint(article.title), article.title, now)
             cves.recordAll(acceptedCvesPerArticle[idx], now)

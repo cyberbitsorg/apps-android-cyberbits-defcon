@@ -15,7 +15,7 @@ class FetchCoordinatorWindowTest {
     private fun entity(triggerRaw: String?) = ArticleEntity(
         id = "id", guid = "guid", title = "t", summary = "s", url = "u",
         source = FeedSource.HACKREAD, publishedAt = 0L, defconScore = 80.0,
-        categories = emptyList(), isRead = false, readAt = null,
+        categories = emptyList(), tags = emptyList(), isRead = false, readAt = null,
         fingerprint = "fp", triggerRaw = triggerRaw,
     )
 

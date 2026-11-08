@@ -29,9 +29,27 @@ class ArticleDaoTest {
         ArticleEntity(
             id = id, guid = "guid-$id", title = "Title $id", summary = "Summary",
             url = "https://x/$id", source = source, publishedAt = ts,
-            defconScore = 10.0, categories = emptyList(), isRead = false, readAt = null,
+            defconScore = 10.0, categories = emptyList(), tags = listOf("news"),
+            isRead = false, readAt = null,
             fingerprint = "fp-$id", triggerRaw = null,
         )
+
+    @Test fun tagsRoundTripThroughConverter() = runTest {
+        val dao = db.articleDao()
+        dao.insertAll(listOf(art("t1", ts = 1000)))
+        assertEquals(listOf("news"), dao.mostRecent(1)[0].tags)
+    }
+
+    @Test fun backfillQueriesFindAndUpdateEmptyTags() = runTest {
+        val dao = db.articleDao()
+        dao.insertAll(listOf(art("b1", ts = 1000), art("b2", ts = 2000)))
+        assertEquals(2, dao.withEmptyTags().size)
+        dao.updateTags("b1", listOf("ransomware", "attacks"))
+        val pending = dao.withEmptyTags()
+        assertEquals(1, pending.size)
+        assertEquals("b2", pending[0].id)
+        assertEquals(listOf("ransomware", "attacks"), dao.mostRecent(10).first { it.id == "b1" }.tags)
+    }
 
     @Test fun insertAndUpsertByGuid() = runTest {
         val dao = db.articleDao()

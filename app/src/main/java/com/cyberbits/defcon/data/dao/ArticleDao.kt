@@ -18,6 +18,12 @@ interface ArticleDao {
     @Query("SELECT guid FROM articles")
     suspend fun allGuids(): List<String>
 
+    @Query("SELECT * FROM articles WHERE tags = '[]'")
+    suspend fun withEmptyTags(): List<ArticleEntity>
+
+    @Query("UPDATE articles SET tags = :tags WHERE id = :id")
+    suspend fun updateTags(id: String, tags: List<String>)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(items: List<ArticleEntity>): List<Long>
 

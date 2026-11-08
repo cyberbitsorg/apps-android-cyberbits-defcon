@@ -20,6 +20,7 @@ data class ArticleEntity(
     val publishedAt: Long,
     val defconScore: Double,
     val categories: List<String>,
+    @ColumnInfo(defaultValue = "[]") val tags: List<String>,
     @ColumnInfo(defaultValue = "0") val isRead: Boolean,
     val readAt: Long?,
     val fingerprint: String,

@@ -30,6 +30,7 @@ class ArticleRepository(private val dao: ArticleDao) {
         score: Double,
         triggerRaw: String?,
         fingerprint: String,
+        tags: List<String>,
     ): Boolean {
         if (dao.guidCount(raw.guid) > 0) return false
         val entity = ArticleEntity(
@@ -42,6 +43,7 @@ class ArticleRepository(private val dao: ArticleDao) {
             publishedAt = raw.publishedAt,
             defconScore = score,
             categories = raw.categories,
+            tags = tags,
             isRead = false,
             readAt = null,
             fingerprint = fingerprint,
@@ -49,6 +51,16 @@ class ArticleRepository(private val dao: ArticleDao) {
         )
         val rowId = dao.insert(entity)
         return rowId != -1L
+    }
+
+    /**
+     * One-shot backfill: classifies articles stored before the tags column existed
+     * (mirrors docker `backfill_article_tags.py`). Returns the number updated.
+     */
+    suspend fun backfillTags(classify: (title: String, summary: String) -> List<String>): Int {
+        val pending = dao.withEmptyTags()
+        for (a in pending) dao.updateTags(a.id, classify(a.title, a.summary))
+        return pending.size
     }
 
     /**
